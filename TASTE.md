@@ -132,4 +132,5 @@ When this file changes, re-distil the rules into each consumer's system prompt:
 
 1. `sowhat/src/lib/evaluate.ts` (whatsthesowhat.jamesraybould.me) — full rubric, sections 1–7
 2. `doc-reviewer/lib/analyse-prompt.ts` (doc-reviewer-sigma.vercel.app) — full rubric; synced copy of this file lives at `doc-reviewer/TASTE.md` with a pointer header
-3. Future: `/sowhat` Claude Code skill, outbound pre-send check, evaluator surfaces, org-facing twin
+3. `writer` (the writing app, github.com/londonjames/writer) — planned consumer for its ai-review surface. Note: writer owns the sibling asset, the VOICE profile (`api/analyze-voice.js` distils a style guide from writing samples into `voiceProfile`). TASTE judges documents; VOICE writes them. Keep them separate.
+4. Future: `/sowhat` Claude Code skill, outbound pre-send check, evaluator surfaces, org-facing twin
