@@ -1,9 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { EvaluationResult, calculateOverall, ratingName } from "./types";
+import { DocumentContext, EvaluationResult } from "./types";
+import { shapeResult } from "./shape";
 
 // SOURCE OF JUDGMENT: this prompt is distilled from TASTE.md (repo root) — the canonical
 // rubric of James's document standards. Edit taste there, then re-distil here. Never here first.
-const SYSTEM_PROMPT = `You are a document reviewer applying one specific executive's codified judgment to business documents: board decks, strategy memos, investment proposals, client deliverables, internal communications, and presentations. You are not a generic reviewer and not a cheerleader. You apply his bar, in his way: encourage with the numbers, improve with the words.
+const SYSTEM_PROMPT = `You are a document reviewer applying James Raybould's codified judgment to business documents: board decks, strategy memos, investment proposals, client deliverables, internal communications, and presentations. You are not a generic reviewer and not a cheerleader. You apply his bar, in his way.
 
 ## The Cardinal Questions
 
@@ -12,7 +13,7 @@ Ask these of every document, in this order, before scoring anything:
 1. So what? What is the one-sentence message? If it cannot be stated in 25 words, the document has failed before formatting matters.
 2. What's the ask? What decision, action, or response does the author want, and is it unmissable on page one? A buried ask is an ignored document.
 3. Would the audience actually do this? The real reader, with their real attention span: will they read it, get it, and act? The audience-reality check beats internal elegance.
-4. Is it boring? Competent but flat is a failure state, not a passing grade. Boring is the cardinal sin.
+4. Is it boring? Competent but flat is a failure state, not a passing grade.
 5. Where does it break? What objection, missing number, or unanswered question derails this in the room? Strong documents name the hard part before the reader does.
 6. What does done look like? Could someone execute against this without the author in the room?
 
@@ -22,10 +23,10 @@ Ask these of every document, in this order, before scoring anything:
 - Ruthless scope: the document says no; what's left out is a quality signal.
 - Radical simplicity: one message, one ask, nothing else.
 - A connected story: the dots are joined for the reader, every section earns its place.
-- A voice you can hear: distinctive language, a point of view, lines worth quoting. A flat delivery of a strong result wastes the result.
+- A clear point of view the reader can act on.
 - Executable clarity and anticipated failure points.
 
-## What Gets Penalised (in the words, per the calibration below)
+## What Gets Penalised
 
 - Corporate waffle: press-release voice, sentences that could appear in any company's document.
 - Hedging: "should", "could potentially", "we believe there may be". Either it is or it isn't.
@@ -34,52 +35,87 @@ Ask these of every document, in this order, before scoring anything:
 - Consultant-speak: RFP-shaped framing, "strategic imperatives", editorialising about what "matters most" beyond what the evidence shows.
 - Fake precision: numbers without sources, invented benchmarks, confident claims the author cannot know.
 - Solving the wrong problem well: polished work that misses the actual objective.
-- Boring. The cardinal sin.
+- Boring.
+
+## Scoring: the number must discriminate
+
+The score tells the author how much work is left. A number that says the same thing about every document is useless. Use the whole range, in 0.5 increments:
+
+- **5** — genuinely excellent. Rare. You would forward this as an example of how to do it.
+- **4.5** — strong. One small thing away from excellent.
+- **4** — good, with a real gap that costs the author something.
+- **3.5** — competent, with meaningful gaps a reader will notice.
+- **3** — competent but flat, or structurally muddled.
+- **2–2.5** — fails on this dimension. A reader would not get what they need.
+- **1–1.5** — absent, or actively working against the document.
+
+Do not round up. If torn between two bands, take the lower one. The number and the words must agree: if your prose says the ask never lands, Intent cannot be a 4.5. Score the document in front of you, not the effort behind it. Length, research and polish are not scores; whether the reader gets it and acts is the score.
+
+The three dimensions:
+
+**Intent (weight: 20%)** — Is it immediately clear what this document is trying to achieve and what it wants from the reader?
+**Delivery (weight: 50%)** — Does the document actually make the case? Is the argument complete, supported, and does it land?
+**Narrative (weight: 30%)** — Is there a clear story pulling you through? Does every section earn its place?
 
 ## Your Task
 
-Read the document carefully. Then produce a structured evaluation using the submit_evaluation tool.
+Read the document carefully, then submit a structured evaluation using the submit_evaluation tool. The parts:
 
-### Part 1: The Main So What
+### 1. The Main So What
+The overarching message in one sentence (maximum 25 words). Then 2-3 supporting takeaways, one sentence each, maximum 20 words. If the document is confusing, say so plainly and list what you can piece together.
 
-Identify the overarching message in one sentence (maximum 25 words — it must fit on two lines of a page). Then list 2-3 supporting takeaways as bullet points. Each bullet must be one sentence, maximum 20 words. Brevity is non-negotiable.
+### 2. Verdict
+One sentence, maximum 20 words, describing the quality of the document. Plain and specific. Say what is true about the document, do not perform.
 
-If the document is confusing, say so plainly and list what you can piece together.
+### 3. Scores and per-dimension feedback
+For each dimension: a headline (one sentence, max 15 words), 2-3 observations on the current state (15-25 words each, referencing actual content), and 1-3 action items stack-ranked by impact. Every action item starts with a short prefix phrase (2-5 words, normal case) then a colon, then the detail. Example: "Lead with the decision: move the break-even timeline and investment requirements to page 1." The prefix alone must carry the point. Explain why the change matters. If a dimension is not a 5, the actions must add up to the path to a 5.
 
-### Part 2: Verdict
+### 4. Rewrites — do the work, do not just describe it
+Produce 2-4 rewrites that carry out your highest-impact action items. This is the most valuable part of the review: the author should be able to paste your text straight into the document.
 
-Write a single punchy sentence (maximum 20 words) that captures the quality of the document. A confident editorial judgment — direct and memorable, with personality. Examples: "A solid proposal that buries its best argument on page 3." or "Clear intent, but the data does the heavy lifting while the narrative coasts." Never bland: a bland compliment is worse than a sharp critique.
+- Rewrite the specific passages your actions name. Typically: the opening, the ask, a heading set, or a table the document needs and lacks.
+- When you are fixing existing text, quote the original in "before" verbatim (trim to at most 60 words). When you are supplying something the document does not have, omit "before".
+- "after" is finished prose the author can paste. Write it in the author's own register using the document's own facts and numbers. Never invent a number the document does not contain; if a figure is genuinely missing, write it as a labelled placeholder like [payback period] so the gap is visible.
+- A table is fine in "after" as a markdown table.
+- "why" is one sentence on what the rewrite fixes.
 
-### Part 3: Scoring
-
-Rate the document on three categories, each on a scale of 0.5 to 5.0 in 0.5 increments:
-
-**Intent (weight: 20%)** — Is it immediately clear what this document is trying to achieve and what it wants from the reader?
-
-**Delivery (weight: 50%)** — Does the document actually make the case? Is the argument complete, supported, and does it land?
-
-**Narrative (weight: 30%)** — Is there a clear story pulling you through? Does every section earn its place?
-
-### Part 4: Category Feedback
-
-For each category, provide:
-1. A headline: a single bold sentence (max 15 words) that captures the judgment for this category. Like a newspaper headline — punchy and direct.
-2. Current state (diagnosis): 2-3 observations about the current state. Each should be one sentence, 15-25 words. These display as bullet points in a narrow column. Reference actual content from the document; never claim something is missing without verifying against what's actually there.
-3. Action items (prescription): 1-3 specific, numbered action items, stack-ranked by impact — the first action is the one that moves the document most. Every item is an action (rewrite X, move Y to page 1, cut Z), never a compliment; praise lives in the diagnosis. Each must start with a short prefix phrase (2-5 words, normal case, not caps) followed by a colon, then the detail. Example: "Lead with the decision: Move the break-even timeline and investment requirements to page 1." The prefix phrase alone must carry the point. Explain why the change matters, not just what to change. If the category scores 4.5+, a single item like "No changes needed: This section is strong as-is." is fine. If a category isn't a 5, the actions must add up to the path to a 5.
-
-## Calibration: Numbers Encourage, Words Bite
-
-- Score generously. The baseline for a professional document with research, data, and structure is 4/5. Score 4.5 if it's well-argued. Score 5 if it's genuinely excellent. A 3.5 means there are meaningful gaps. A 3 means serious structural problems. Below 3 is rare. Most documents you review will be competent professional work and should score in the 4-4.5 range per category. A document doesn't need a crisp "ask" to score well. When in doubt, round up.
-- The words apply the full standards without softening. A 4/5 document with a buried ask gets a 4 — and a verdict that says exactly where the ask is buried and what it costs. Never let a generous number launder a real weakness out of the prose.
+### 5. Red team — the questions they cannot answer
+Exactly 3 questions the author will be asked in the room and cannot currently answer from this document. These are the objections that derail the meeting. Be specific to the content: name the number, page, or claim that is exposed. Not generic ("what about risks?") but pointed ("The board asked for efficiency; where does the $1.65M come from without raising burn?").
 
 ## Language Rules
 
 - Never use the word "honest" in any form ("honest", "honestly", "an honest assessment", "to be honest"), nor "frankly", "truthfully", "the truth is". Just say the thing.
+- No clever writing. No inversions ("not X, but Y"), no aphorisms, no dramatic sentence fragments, no lines written to be quoted. Describe the document, do not perform. "The ask for $1.65M appears on page 6" beats "a $1.65M ask dressed up as a conversation starter." Clear and useful, never smart.
 - No hedging in your own feedback: no "you may want to consider", "could potentially". State what is, what isn't, and what to do.
-- Plain words. Short sentences. No throat-clearing, no filler praise. Every sentence earns its place.
+- Plain words. Short sentences. No throat-clearing, no filler praise.
 - British English spellings (organisation, prioritise, analyse). No em-dashes; use commas, colons, or full stops.
-- Be specific. Be concise. Sharp beats safe.
-- Use half-star increments only: 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0.`;
+- Never claim something is missing without verifying against what is actually there.`;
+
+function categoryProperties(key: string, label: string) {
+  return {
+    [key]: {
+      type: "number" as const,
+      description: `${label} score from 0.5 to 5.0 in 0.5 increments. Use the full range; do not round up.`,
+    },
+    [`${key}_headline`]: {
+      type: "string" as const,
+      description: `Headline for ${label} (max 15 words)`,
+    },
+    [`${key}_feedback`]: {
+      type: "string" as const,
+      description: `2-3 sentences (15-25 words each) on ${label}'s current state`,
+    },
+    [`${key}_improvement`]: {
+      type: "string" as const,
+      description: `1-2 specific prescriptions for improving ${label}`,
+    },
+    [`${key}_actions`]: {
+      type: "array" as const,
+      items: { type: "string" as const },
+      description: `1-3 action items for ${label}, stack-ranked by impact. Each MUST start with a short prefix phrase (normal case, not caps) followed by a colon. Max 25 words each.`,
+    },
+  };
+}
 
 const EVALUATION_TOOL: Anthropic.Messages.Tool = {
   name: "submit_evaluation",
@@ -87,27 +123,33 @@ const EVALUATION_TOOL: Anthropic.Messages.Tool = {
   input_schema: {
     type: "object" as const,
     required: [
+      "verdict",
       "mirror_lead",
       "mirror_bullets",
-      "verdict",
       "intent",
       "delivery",
       "narrative",
       "intent_headline",
       "intent_feedback",
-      "intent_improvement",
       "delivery_headline",
       "delivery_feedback",
-      "delivery_improvement",
       "narrative_headline",
       "narrative_feedback",
-      "narrative_improvement",
+      "rewrites",
+      "red_team",
     ],
     properties: {
+      // Order matters: fields stream back in roughly this order, and the UI
+      // reveals each section as it completes.
+      verdict: {
+        type: "string" as const,
+        description:
+          "One sentence (max 20 words) describing the quality of the document. Plain and specific, never clever.",
+      },
       mirror_lead: {
         type: "string" as const,
         description:
-          "The overarching message in ONE sentence, MAXIMUM 25 words. Must fit on two lines.",
+          "The overarching message the document actually conveys, in ONE sentence, MAXIMUM 25 words.",
       },
       mirror_bullets: {
         type: "array" as const,
@@ -115,89 +157,123 @@ const EVALUATION_TOOL: Anthropic.Messages.Tool = {
         description:
           "2-3 supporting takeaways. Each MUST be one sentence, MAXIMUM 20 words each.",
       },
-      verdict: {
+      gap_landed: {
         type: "string" as const,
         description:
-          "A single punchy sentence (max 20 words) capturing the quality of the document",
+          "ONLY when the author supplied their intended so-what. One sentence: what a reader will actually take away, phrased for direct comparison against the author's stated intent.",
       },
-      intent: {
-        type: "number" as const,
-        description: "Intent score from 0.5 to 5.0 in 0.5 increments",
-      },
-      delivery: {
-        type: "number" as const,
-        description: "Delivery score from 0.5 to 5.0 in 0.5 increments",
-      },
-      narrative: {
-        type: "number" as const,
-        description: "Narrative score from 0.5 to 5.0 in 0.5 increments",
-      },
-      intent_headline: {
+      gap: {
         type: "string" as const,
-        description: "Bold 1-sentence headline for Intent (max 15 words)",
+        description:
+          "ONLY when the author supplied their intended so-what. One or two sentences naming the difference between what they meant and what lands, and what in the document causes it. If they match closely, say so plainly.",
       },
-      intent_feedback: {
-        type: "string" as const,
-        description: "2-3 sentences (15-25 words each) on Intent's current state",
+      ...categoryProperties("intent", "Intent"),
+      ...categoryProperties("delivery", "Delivery"),
+      ...categoryProperties("narrative", "Narrative"),
+      rewrites: {
+        type: "array" as const,
+        description:
+          "2-4 rewrites carrying out the highest-impact action items. Finished text the author can paste.",
+        items: {
+          type: "object" as const,
+          required: ["label", "why", "after"],
+          properties: {
+            label: {
+              type: "string" as const,
+              description:
+                "What this rewrites, 2-5 words. e.g. 'Opening paragraph', 'The ask', 'Investment summary table'.",
+            },
+            why: {
+              type: "string" as const,
+              description: "One sentence on what this rewrite fixes.",
+            },
+            before: {
+              type: "string" as const,
+              description:
+                "The original passage, quoted verbatim, trimmed to at most 60 words. Omit entirely when supplying content the document does not have.",
+            },
+            after: {
+              type: "string" as const,
+              description:
+                "Finished replacement text the author can paste, using the document's own facts. Markdown tables allowed. Use [labelled placeholders] for figures the document does not contain.",
+            },
+          },
+        },
       },
-      intent_improvement: {
-        type: "string" as const,
-        description: "1-2 specific prescriptions for improving Intent",
-      },
-      intent_actions: {
+      red_team: {
         type: "array" as const,
         items: { type: "string" as const },
-        description: "1-3 action items for Intent. Each MUST start with a short prefix phrase (normal case, not caps) followed by colon. Max 25 words each.",
+        description:
+          "Exactly 3 specific questions the author will be asked and cannot answer from this document.",
       },
-      delivery_headline: {
-        type: "string" as const,
-        description: "Bold 1-sentence headline for Delivery (max 15 words)",
-      },
-      delivery_feedback: {
-        type: "string" as const,
-        description: "2-3 sentences (15-25 words each) on Delivery's current state",
-      },
-      delivery_improvement: {
-        type: "string" as const,
-        description: "1-2 specific prescriptions for improving Delivery",
-      },
-      delivery_actions: {
+      progress_addressed: {
         type: "array" as const,
         items: { type: "string" as const },
-        description: "1-3 action items for Delivery. Each MUST start with a short prefix phrase (normal case, not caps) followed by colon. Max 25 words each.",
+        description:
+          "ONLY on a re-review. Which of the previous review's action items this version has addressed. Short phrases.",
       },
-      narrative_headline: {
-        type: "string" as const,
-        description: "Bold 1-sentence headline for Narrative (max 15 words)",
-      },
-      narrative_feedback: {
-        type: "string" as const,
-        description: "2-3 sentences (15-25 words each) on Narrative's current state",
-      },
-      narrative_improvement: {
-        type: "string" as const,
-        description: "1-2 specific prescriptions for improving Narrative",
-      },
-      narrative_actions: {
+      progress_outstanding: {
         type: "array" as const,
         items: { type: "string" as const },
-        description: "1-3 action items for Narrative. Each MUST start with a short prefix phrase (normal case, not caps) followed by colon. Max 25 words each.",
+        description:
+          "ONLY on a re-review. Which previous action items are still outstanding. Short phrases.",
+      },
+      progress_summary: {
+        type: "string" as const,
+        description:
+          "ONLY on a re-review. One sentence on what changed since the previous version.",
       },
     },
   },
 };
 
-function clampScore(score: number): number {
-  const clamped = Math.max(0.5, Math.min(5.0, score));
-  return Math.round(clamped * 2) / 2;
+function buildUserContent(
+  text: string,
+  context?: DocumentContext,
+  previous?: { overall: number; actions: string[] }
+): string {
+  const parts: string[] = [];
+
+  if (context?.audience?.trim()) {
+    parts.push(
+      `The author describes the audience and context as follows. Use this to judge whether the document works for these specific readers, and reference them directly where it matters:\n"""\n${context.audience.trim()}\n"""`
+    );
+  }
+
+  if (context?.intended?.trim()) {
+    parts.push(
+      `The author says the main So What they INTEND the document to convey is:\n"""\n${context.intended.trim()}\n"""\nCompare this against what the document actually conveys. Fill in gap_landed and gap. Do not let their stated intent change your reading of the document; judge what is on the page.`
+    );
+  }
+
+  if (previous) {
+    parts.push(
+      `This is a re-review. The previous version scored ${previous.overall}/100 and was given these action items:\n${previous.actions
+        .map((a, i) => `${i + 1}. ${a}`)
+        .join(
+          "\n"
+        )}\nFill in progress_addressed, progress_outstanding and progress_summary based on what has changed. Score this version on its own merits.`
+    );
+  }
+
+  parts.push(`Please evaluate this document:\n\n${text}`);
+  return parts.join("\n\n");
+}
+
+export interface EvaluateOptions {
+  context?: DocumentContext;
+  previous?: { overall: number; actions: string[] };
+  /** Called with the accumulated partial tool-input JSON as it streams. */
+  onPartial?: (partialJson: string) => void;
 }
 
 export async function evaluateDocument(
-  text: string
+  text: string,
+  options: EvaluateOptions = {}
 ): Promise<EvaluationResult> {
   const client = new Anthropic();
 
-  const message = await client.messages.create({
+  const stream = client.messages.stream({
     model: "claude-opus-5",
     max_tokens: 16000,
     thinking: { type: "adaptive" },
@@ -208,10 +284,28 @@ export async function evaluateDocument(
     messages: [
       {
         role: "user",
-        content: `Please evaluate this document:\n\n${text}`,
+        content: buildUserContent(text, options.context, options.previous),
       },
     ],
   });
+
+  if (options.onPartial) {
+    let accumulated = "";
+    stream.on("contentBlock", () => {
+      accumulated = "";
+    });
+    stream.on("streamEvent", (event) => {
+      if (
+        event.type === "content_block_delta" &&
+        event.delta.type === "input_json_delta"
+      ) {
+        accumulated += event.delta.partial_json;
+        options.onPartial?.(accumulated);
+      }
+    });
+  }
+
+  const message = await stream.finalMessage();
 
   const toolBlock = message.content.find(
     (block): block is Anthropic.Messages.ToolUseBlock =>
@@ -221,49 +315,36 @@ export async function evaluateDocument(
     throw new Error("No evaluation returned from Claude");
   }
 
-  const input = toolBlock.input as Record<string, unknown>;
+  return buildResult(
+    toolBlock.input as Record<string, unknown>,
+    options.context,
+    options.previous
+  );
+}
 
-  const intentScore = clampScore(input.intent as number);
-  const deliveryScore = clampScore(input.delivery as number);
-  const narrativeScore = clampScore(input.narrative as number);
-  const overall = calculateOverall(intentScore, deliveryScore, narrativeScore);
+/** Shape the finished tool input, filling defaults for anything the model omitted. */
+function buildResult(
+  input: Record<string, unknown>,
+  context?: DocumentContext,
+  previous?: { overall: number; actions: string[] }
+): EvaluationResult {
+  const shaped = shapeResult(input, {
+    context,
+    previousOverall: previous?.overall,
+  });
 
   return {
-    mirror_lead: input.mirror_lead as string,
-    mirror_bullets: input.mirror_bullets as string[],
-    verdict: input.verdict as string,
-    scores: {
-      intent: intentScore,
-      delivery: deliveryScore,
-      narrative: narrativeScore,
-    },
-    overall,
-    rating_name: ratingName(overall),
-    categories: [
-      {
-        name: "Intent",
-        score: intentScore,
-        headline: input.intent_headline as string,
-        feedback: input.intent_feedback as string,
-        improvement: input.intent_improvement as string,
-        actions: (input.intent_actions as string[]) || [],
-      },
-      {
-        name: "Delivery",
-        score: deliveryScore,
-        headline: input.delivery_headline as string,
-        feedback: input.delivery_feedback as string,
-        improvement: input.delivery_improvement as string,
-        actions: (input.delivery_actions as string[]) || [],
-      },
-      {
-        name: "Narrative",
-        score: narrativeScore,
-        headline: input.narrative_headline as string,
-        feedback: input.narrative_feedback as string,
-        improvement: input.narrative_improvement as string,
-        actions: (input.narrative_actions as string[]) || [],
-      },
-    ],
+    mirror_lead: shaped.mirror_lead || "",
+    mirror_bullets: shaped.mirror_bullets || [],
+    verdict: shaped.verdict || "",
+    scores: shaped.scores || { intent: 0.5, delivery: 0.5, narrative: 0.5 },
+    overall: shaped.overall ?? 0,
+    rating_name: shaped.rating_name || "Nope",
+    categories: shaped.categories || [],
+    rewrites: shaped.rewrites || [],
+    red_team: shaped.red_team || [],
+    gap: shaped.gap,
+    context: shaped.context,
+    progress: shaped.progress,
   };
 }

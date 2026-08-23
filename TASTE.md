@@ -72,18 +72,27 @@ Every document is judged on exactly three dimensions. These names and weights ar
 - **Boring.** The cardinal sin, restated because it keeps the company of all the sins above. "Not bad. Boring."
 - **Solving the wrong problem well.** Technically polished work that misses the actual objective scores lower than rough work aimed at the right target. Optimising for what's buildable instead of what's needed.
 
-## 5. Scoring Calibration — Numbers Encourage, Words Bite
+## 5. Scoring Calibration — The Number Must Discriminate
 
-<!-- Provenance: sowhat git history (deliberate April 2026 recalibration across multiple commits:
-     "Recalibrate scoring: shift up ~0.5-1.0 stars across the board", "Push scoring higher: baseline 4/5,
-     most docs should be 4-4.5 per category") reconciled with the harshness evidence above. This is a
-     settled product decision, not an accident: scores are the shareable artifact, prose is the judgment. -->
+<!-- Provenance: superseded the April 2026 "score generously" recalibration on 23 August 2026 at James's
+     direction. The generous banding compressed every document into 70-88, so the number carried no
+     information and disagreed with the prose sitting next to it. The words were always the judgment;
+     now the number is too. -->
 
-The numeric score and the verbal feedback have different jobs:
+The score has one job: to tell the author how much work is left. A number that says the same thing about every document does not do that job.
 
-- **Numbers are calibrated generously.** The baseline for competent professional work with research, data, and structure is 4/5 per dimension. 4.5 means well-argued. 5 means genuinely excellent. 3.5 means meaningful gaps. 3 means serious structural problems. Below 3 is rare. When in doubt, round up. Scores in half-increments only (0.5–5.0). A document does not need a crisp ask to score well numerically.
-- **Words carry the harshness.** The verdict, headlines, and feedback apply the full standards of sections 1–4 without softening. A 4/5 document with a buried ask gets a 4 — and a verdict that says exactly where the ask is buried and what it costs. Never let a generous number launder a real weakness out of the prose.
-- **Why:** scores get screenshotted and shared; brutal numbers make authors defensive and stop them resubmitting. Sharp words make them fix the document. Encourage with the number, improve with the words.
+- **Use the whole range.** Half-increments only (0.5–5.0), and every band should be reachable. If your scores across many documents cluster in a two-point band, you are not scoring, you are decorating.
+- **The anchors:**
+  - **5** — genuinely excellent. Rare. You would forward this to someone as an example.
+  - **4.5** — strong. One small thing away from excellent.
+  - **4** — good, with a real gap that costs the author something.
+  - **3.5** — competent, with meaningful gaps a reader will notice.
+  - **3** — competent but flat, or structurally muddled. The cardinal sin (boring) lives here.
+  - **2–2.5** — fails on this dimension. A reader would not get what they need.
+  - **1–1.5** — absent or actively working against the document.
+- **Do not round up.** If torn between two bands, take the lower one. The generous instinct is what broke the previous calibration.
+- **The number and the words must agree.** A buried ask is not a 4.5 with a sharp verdict attached. If the prose says the document fails to land its ask, Intent scores accordingly. Never let a kind number contradict a true sentence.
+- **Score the document in front of you, not the effort behind it.** Research, length, and polish are not scores. Whether the reader gets it and acts is the score.
 
 ## 6. How Feedback Is Given
 
@@ -122,7 +131,8 @@ The feedback standards:
 - **Explain the why.** Feedback says why the change matters, not just what to change.
 - **British English.** Organisation, prioritise, analyse.
 - **No em-dashes.** Use commas, colons, or full stops.
-- **Sharp beats safe.** Specific, confident judgment, with personality, even when the news is good. A bland compliment is worse than a sharp critique.
+- **Direct, not clever.** Specific, confident judgment, even when the news is good. A bland compliment is worse than a sharp critique.
+- **No clever writing.** No inversions ("not X, but Y"), no aphorisms, no dramatic sentence fragments, no lines written to be quoted. The verdict describes the document; it does not perform. "The ask for $1.65M appears on page 6" beats "a $1.65M ask dressed up as a conversation starter." Clear and useful, never smart.
 
 ---
 

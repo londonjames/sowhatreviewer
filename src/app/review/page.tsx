@@ -3,16 +3,24 @@
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { EvaluationResult } from "@/lib/types";
-import ScoreDisplay from "@/components/ScoreDisplay";
-import MirrorSection from "@/components/MirrorSection";
-import CategoryCard from "@/components/CategoryCard";
+import ReviewBody from "@/components/ReviewBody";
 
-function getStoredResult(): EvaluationResult | null {
+interface StoredResult {
+  evaluation: EvaluationResult;
+  truncated?: boolean;
+}
+
+/**
+ * Fallback route for when a review could not be persisted (no Redis
+ * configured), so there is no shareable /r/[id] to send the author to.
+ */
+function getStoredResult(): StoredResult | null {
   if (typeof window === "undefined") return null;
   try {
     const stored = sessionStorage.getItem("sowhat_result");
     if (!stored) return null;
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    return parsed?.evaluation ? parsed : { evaluation: parsed };
   } catch {
     return null;
   }
@@ -20,9 +28,9 @@ function getStoredResult(): EvaluationResult | null {
 
 export default function ReviewPage() {
   const router = useRouter();
-  const result = useMemo(() => getStoredResult(), []);
+  const stored = useMemo(() => getStoredResult(), []);
 
-  if (!result) {
+  if (!stored) {
     if (typeof window !== "undefined") {
       router.replace("/");
     }
@@ -35,37 +43,28 @@ export default function ReviewPage() {
 
   return (
     <div className="flex flex-col items-center px-6 py-16">
-      <div className="w-full max-w-2xl space-y-10">
-        <ScoreDisplay result={result} />
-
-        <hr className="border-gray-border" />
-
-        <MirrorSection
-          lead={result.mirror_lead}
-          bullets={result.mirror_bullets}
+      <div className="w-full max-w-2xl">
+        <ReviewBody
+          result={stored.evaluation}
+          truncated={stored.truncated}
         />
 
-        <hr className="border-gray-border" />
-
-        <div className="space-y-10">
-          {result.categories.map((cat, i) => (
-            <div key={cat.name}>
-              <CategoryCard category={cat} />
-              {i < result.categories.length - 1 && (
-                <hr className="mt-10 border-gray-border" />
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex justify-center pt-4 pb-8">
+        <div className="flex justify-center pt-12">
           <button
             onClick={() => router.push("/")}
-            className="rounded-xl border border-gray-border px-8 py-3 text-sm font-medium text-foreground transition-colors hover:bg-surface"
+            className="rounded-lg border border-gray-border px-8 py-3 text-sm uppercase tracking-[0.15em] text-[#1a5a8a] transition-colors hover:border-[#1a5a8a] hover:bg-[#1a5a8a] hover:text-white"
+            style={{ fontFamily: "var(--font-inter), sans-serif" }}
           >
-            Review Another Document
+            Review another document
           </button>
         </div>
+
+        <p
+          className="mt-10 text-center text-sm text-gray-light"
+          style={{ fontFamily: "var(--font-inter), sans-serif" }}
+        >
+          Reviewed against James Raybould&apos;s bar for executive documents.
+        </p>
       </div>
     </div>
   );

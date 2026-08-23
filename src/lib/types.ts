@@ -7,6 +7,26 @@ export interface CategoryEvaluation {
   actions: string[]; // 1-3 numbered action items
 }
 
+/** A specific passage rewritten, tied to one of the action items. */
+export interface Rewrite {
+  label: string; // "Opening paragraph", "The ask", "Investment summary table"
+  why: string; // one sentence on what the rewrite fixes
+  before?: string; // quoted from the document; absent when the content is new
+  after: string; // the replacement, markdown table allowed
+}
+
+/** Shown only when the author told us what they meant to say. */
+export interface GapMirror {
+  intended: string;
+  landed: string;
+  gap: string;
+}
+
+export interface DocumentContext {
+  audience?: string;
+  intended?: string;
+}
+
 export interface EvaluationResult {
   mirror_lead: string;
   mirror_bullets: string[];
@@ -19,6 +39,17 @@ export interface EvaluationResult {
   overall: number;
   rating_name: string;
   categories: CategoryEvaluation[];
+  rewrites: Rewrite[];
+  red_team: string[];
+  gap?: GapMirror;
+  context?: DocumentContext;
+  /** Set on a re-review: what changed since the previous pass. */
+  progress?: {
+    previous_overall: number;
+    addressed: string[];
+    outstanding: string[];
+    summary: string;
+  };
 }
 
 export function calculateOverall(

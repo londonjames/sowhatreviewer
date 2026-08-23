@@ -2,22 +2,43 @@
 
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { EvaluationResult } from "@/lib/types";
+import { parsePartialJson } from "@/lib/partial-json";
+import { shapeResult } from "@/lib/shape";
+import ReviewBody from "./ReviewBody";
+import { rememberReview } from "@/lib/history";
 
-const ACCEPTED_EXTENSIONS = ".pdf,.docx,.pptx";
+const ACCEPTED = ".pdf,.docx,.doc,.pptx,.ppt,.txt,.md";
+const ACCEPTED_EXTENSIONS = ["pdf", "docx", "doc", "pptx", "ppt", "txt", "md"];
 
-export default function InputArea() {
+const FIELD_CLASS =
+  "w-full resize-y rounded-lg border border-gray-border bg-white px-5 py-3 text-base leading-relaxed text-foreground placeholder:text-gray-light outline-none transition-colors focus:border-foreground";
+
+const LABEL_CLASS = "mb-1.5 block text-left text-base text-gray";
+
+interface InputAreaProps {
+  /** Set when re-reviewing an edited document against an earlier review. */
+  previousId?: string;
+}
+
+export default function InputArea({ previousId }: InputAreaProps) {
   const [text, setText] = useState("");
+  const [audience, setAudience] = useState("");
+  const [intended, setIntended] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [partial, setPartial] = useState<Partial<EvaluationResult>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   const handleFile = useCallback((f: File) => {
     const ext = f.name.split(".").pop()?.toLowerCase();
-    if (!ext || !["pdf", "docx", "pptx"].includes(ext)) {
-      setError("Unsupported file type. Please upload a PDF, DOCX, or PPTX.");
+    if (!ext || !ACCEPTED_EXTENSIONS.includes(ext)) {
+      setError(
+        "Unsupported file type. Please upload a PDF, DOC, DOCX, PPT, PPTX, TXT or MD file."
+      );
       return;
     }
     setFile(f);
@@ -44,6 +65,27 @@ export default function InputArea() {
     setError("");
   };
 
+  const buildRequest = (): RequestInit => {
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (audience.trim()) formData.append("audience", audience.trim());
+      if (intended.trim()) formData.append("intended", intended.trim());
+      if (previousId) formData.append("previousId", previousId);
+      return { method: "POST", body: formData };
+    }
+    return {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: text.trim(),
+        audience: audience.trim() || undefined,
+        intended: intended.trim() || undefined,
+        previousId,
+      }),
+    };
+  };
+
   const handleSubmit = async () => {
     if (!text.trim() && !file) {
       setError("Please paste some text or upload a file.");
@@ -52,38 +94,90 @@ export default function InputArea() {
 
     setLoading(true);
     setError("");
+    setPartial({});
+
+    const shapeOptions = {
+      context: {
+        audience: audience.trim() || undefined,
+        intended: intended.trim() || undefined,
+      },
+    };
 
     try {
-      let res: Response;
-
-      if (file) {
-        const formData = new FormData();
-        formData.append("file", file);
-        res = await fetch("/api/evaluate", {
-          method: "POST",
-          body: formData,
-        });
-      } else {
-        res = await fetch("/api/evaluate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: text.trim() }),
-        });
-      }
-
-      const data = await res.json();
+      const res = await fetch("/api/evaluate", buildRequest());
 
       if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
         setError(data.error || "Something went wrong. Please try again.");
         setLoading(false);
         return;
       }
+      if (!res.body) {
+        setError("Something went wrong. Please try again.");
+        setLoading(false);
+        return;
+      }
 
-      sessionStorage.setItem("sowhat_result", JSON.stringify(data.evaluation));
-      if (data.id) {
-        router.push(`/r/${data.id}`);
-      } else {
-        router.push("/review");
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let finished = false;
+
+      while (!finished) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // Newline-delimited JSON: the last piece may be a partial line.
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          let event: Record<string, unknown>;
+          try {
+            event = JSON.parse(line);
+          } catch {
+            continue;
+          }
+
+          if (event.type === "partial") {
+            const parsed = parsePartialJson(event.json as string);
+            // A fragment that can't be salvaged just means nothing new yet.
+            if (parsed) setPartial(shapeResult(parsed, shapeOptions));
+          } else if (event.type === "error") {
+            setError(
+              (event.error as string) ||
+                "Something went wrong. Please try again."
+            );
+            setLoading(false);
+            finished = true;
+          } else if (event.type === "done") {
+            const evaluation = event.evaluation as EvaluationResult;
+            const id = event.id as string | undefined;
+            sessionStorage.setItem(
+              "sowhat_result",
+              JSON.stringify({ evaluation, truncated: !!event.truncated })
+            );
+            if (id) {
+              rememberReview({
+                id,
+                overall: evaluation.overall,
+                verdict: evaluation.verdict,
+                createdAt: new Date().toISOString(),
+              });
+              router.push(`/r/${id}`);
+            } else {
+              router.push("/review");
+            }
+            finished = true;
+          }
+        }
+      }
+
+      if (!finished) {
+        setError("The review ended early. Please try again.");
+        setLoading(false);
       }
     } catch {
       setError("Network error. Please check your connection and try again.");
@@ -92,20 +186,30 @@ export default function InputArea() {
   };
 
   if (loading) {
+    const hasContent = Object.keys(partial).length > 0;
     return (
-      <div className="flex flex-col items-center justify-center gap-6 py-20">
-        <p className="text-xl italic text-foreground">
-          Reading your document...
-        </p>
-        <div className="flex items-center gap-2">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="h-1.5 w-8 rounded-full bg-gray-border animate-pulse"
-              style={{ animationDelay: `${i * 200}ms` }}
-            />
-          ))}
-        </div>
+      <div className="flex w-full flex-col items-center gap-8 py-8">
+        {!hasContent && (
+          <>
+            <p className="text-xl italic text-foreground">
+              Reading your document...
+            </p>
+            <div className="flex items-center gap-2">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="h-1.5 w-8 animate-pulse rounded-full bg-gray-border"
+                  style={{ animationDelay: `${i * 200}ms` }}
+                />
+              ))}
+            </div>
+          </>
+        )}
+        {hasContent && (
+          <div className="w-full text-left">
+            <ReviewBody result={partial} streaming />
+          </div>
+        )}
       </div>
     );
   }
@@ -118,7 +222,7 @@ export default function InputArea() {
         placeholder="Paste your document here..."
         rows={4}
         autoFocus
-        className="w-full resize-y rounded-lg border border-gray-border bg-white px-5 py-4 text-base leading-relaxed text-foreground placeholder:text-gray-light outline-none transition-colors focus:border-foreground"
+        className={FIELD_CLASS}
       />
 
       <div
@@ -140,19 +244,17 @@ export default function InputArea() {
         {file ? (
           <p className="text-sm text-foreground">
             <span className="font-medium">{file.name}</span>
-            <span className="ml-2 text-gray-light">
-              (click to replace)
-            </span>
+            <span className="ml-2 text-gray-light">(click to replace)</span>
           </p>
         ) : (
           <p className="text-base text-gray-light">
-            Or add a file here (e.g., PDF, DOC, PPT)
+            Or add a file here (PDF, DOC, DOCX, PPT, PPTX)
           </p>
         )}
         <input
           ref={fileInputRef}
           type="file"
-          accept={ACCEPTED_EXTENSIONS}
+          accept={ACCEPTED}
           onChange={(e) => {
             const f = e.target.files?.[0];
             if (f) handleFile(f);
@@ -161,16 +263,47 @@ export default function InputArea() {
         />
       </div>
 
-      {error && (
-        <p className="text-center text-sm text-red-700">{error}</p>
-      )}
+      <div className="flex flex-col gap-4 border-t border-gray-border pt-5">
+        <div>
+          <label htmlFor="audience" className={LABEL_CLASS}>
+            Describe your audience and any other context our reviewer should
+            know{" "}
+            <span className="text-gray-light">(optional)</span>
+          </label>
+          <textarea
+            id="audience"
+            value={audience}
+            onChange={(e) => setAudience(e.target.value)}
+            rows={2}
+            placeholder="e.g. My board. They asked for efficiency last quarter and are sceptical of new headcount."
+            className={FIELD_CLASS}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="intended" className={LABEL_CLASS}>
+            In one sentence, what&apos;s the main So What you intend your doc to
+            convey? <span className="text-gray-light">(optional)</span>
+          </label>
+          <input
+            id="intended"
+            type="text"
+            value={intended}
+            onChange={(e) => setIntended(e.target.value)}
+            placeholder="We'll show you the gap between that and what actually lands."
+            className={FIELD_CLASS}
+          />
+        </div>
+      </div>
+
+      {error && <p className="text-center text-sm text-red-700">{error}</p>}
 
       <button
         onClick={handleSubmit}
         disabled={!text.trim() && !file}
         className="rounded-lg border border-foreground bg-foreground px-10 py-3 text-base font-semibold uppercase tracking-[0.15em] text-white transition-colors hover:bg-white hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
       >
-        Review
+        {previousId ? "Re-review" : "Review"}
       </button>
     </div>
   );

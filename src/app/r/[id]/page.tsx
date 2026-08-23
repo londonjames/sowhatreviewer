@@ -3,17 +3,23 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { EvaluationResult, ratingName as computeRatingName } from "@/lib/types";
-import ScoreDisplay from "@/components/ScoreDisplay";
-import MirrorSection from "@/components/MirrorSection";
-import CategoryCard from "@/components/CategoryCard";
+import { reviewToMarkdown } from "@/lib/markdown";
+import ReviewBody from "@/components/ReviewBody";
 
-function getSessionResult(): EvaluationResult | null {
+interface StoredResult {
+  evaluation: EvaluationResult;
+  truncated?: boolean;
+}
+
+function takeSessionResult(): StoredResult | null {
   if (typeof window === "undefined") return null;
   try {
     const stored = sessionStorage.getItem("sowhat_result");
     if (!stored) return null;
     sessionStorage.removeItem("sowhat_result");
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    // Older entries stored the evaluation directly.
+    return parsed?.evaluation ? parsed : { evaluation: parsed };
   } catch {
     return null;
   }
@@ -22,13 +28,13 @@ function getSessionResult(): EvaluationResult | null {
 export default function SavedReviewPage() {
   const params = useParams();
   const router = useRouter();
-  const cachedResult = useMemo(() => getSessionResult(), []);
-  const [result, setResult] = useState<EvaluationResult | null>(cachedResult);
-  const [loading, setLoading] = useState(!cachedResult);
+  const cached = useMemo(() => takeSessionResult(), []);
+  const [stored, setStored] = useState<StoredResult | null>(cached);
+  const [loading, setLoading] = useState(!cached);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (cachedResult) return;
+    if (cached) return;
     const id = params.id as string;
     if (!id) return;
     fetch(`/api/review?id=${id}`)
@@ -37,14 +43,14 @@ export default function SavedReviewPage() {
         return res.json();
       })
       .then((data) => {
-        setResult(data.evaluation);
+        setStored({ evaluation: data.evaluation });
         setLoading(false);
       })
       .catch(() => {
         setError("Review not found.");
         setLoading(false);
       });
-  }, [params.id, cachedResult]);
+  }, [params.id, cached]);
 
   if (loading) {
     return (
@@ -54,7 +60,7 @@ export default function SavedReviewPage() {
     );
   }
 
-  if (error || !result) {
+  if (error || !stored) {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
         <p className="text-lg text-gray">{error || "Review not found."}</p>
@@ -68,61 +74,95 @@ export default function SavedReviewPage() {
     );
   }
 
-  return <ReviewLayout result={result} />;
+  return (
+    <ReviewLayout
+      stored={stored}
+      reviewId={params.id as string}
+      router={router}
+    />
+  );
 }
 
-function ReviewLayout({ result }: { result: EvaluationResult }) {
-  const router = useRouter();
+const ACTION_CLASS =
+  "rounded-lg border border-gray-border px-6 py-3 text-sm uppercase tracking-[0.15em] text-[#1a5a8a] transition-colors hover:border-[#1a5a8a] hover:bg-[#1a5a8a] hover:text-white";
 
-  // Backward compat: old evals have `mirror` string, new have `mirror_lead` + `mirror_bullets`
-  const r = result as EvaluationResult & { mirror?: string };
-  const mirrorLead = r.mirror_lead || r.mirror || "";
-  const mirrorBullets = r.mirror_bullets || [];
-  const ratingNameVal = r.rating_name || computeRatingName(r.overall);
-  const verdict = r.verdict || "";
+function ReviewLayout({
+  stored,
+  reviewId,
+  router,
+}: {
+  stored: StoredResult;
+  reviewId: string;
+  router: ReturnType<typeof useRouter>;
+}) {
+  const [copied, setCopied] = useState<"link" | "text" | null>(null);
+
+  // Backward compat: early evaluations used a single `mirror` string.
+  const raw = stored.evaluation as EvaluationResult & { mirror?: string };
+  const result: EvaluationResult = {
+    ...raw,
+    mirror_lead: raw.mirror_lead || raw.mirror || "",
+    mirror_bullets: raw.mirror_bullets || [],
+    rating_name: raw.rating_name || computeRatingName(raw.overall),
+    verdict: raw.verdict || "",
+    rewrites: raw.rewrites || [],
+    red_team: raw.red_team || [],
+  };
+
+  const copy = async (kind: "link" | "text") => {
+    const payload =
+      kind === "link" ? window.location.href : reviewToMarkdown(result);
+    try {
+      await navigator.clipboard.writeText(payload);
+      setCopied(kind);
+      setTimeout(() => setCopied(null), 1600);
+    } catch {
+      // Clipboard access can be denied; nothing useful to say here.
+    }
+  };
 
   return (
     <div className="flex flex-col items-center px-6 py-16">
       <div className="w-full max-w-2xl">
-        <ScoreDisplay result={{ ...result, rating_name: ratingNameVal, verdict }} />
+        <ReviewBody result={result} truncated={stored.truncated} />
 
-        <div className="mt-6" />
-
-        <MirrorSection
-          lead={mirrorLead}
-          bullets={mirrorBullets}
-        />
-
-        {/* Full horizontal rule before category sections */}
-        <hr className="mt-8 mb-6 border-foreground/20" />
-
-        {result.categories.map((cat, i) => (
-          <div key={cat.name}>
-            <CategoryCard category={cat} />
-            {i < result.categories.length - 1 && (
-              <hr className="my-4 border-foreground/20" />
-            )}
-          </div>
-        ))}
-
-        <div className="mt-8 flex items-center justify-center gap-4">
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={() => router.push(`/?previous=${reviewId}`)}
+            className="rounded-lg border border-[#1a5a8a] bg-[#1a5a8a] px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition-colors hover:bg-white hover:text-[#1a5a8a]"
+            style={{ fontFamily: "var(--font-inter), sans-serif" }}
+          >
+            Re-review after edits
+          </button>
+          <button
+            onClick={() => copy("link")}
+            className={ACTION_CLASS}
+            style={{ fontFamily: "var(--font-inter), sans-serif" }}
+          >
+            {copied === "link" ? "Link copied" : "Share this review"}
+          </button>
+          <button
+            onClick={() => copy("text")}
+            className={ACTION_CLASS}
+            style={{ fontFamily: "var(--font-inter), sans-serif" }}
+          >
+            {copied === "text" ? "Copied" : "Copy as text"}
+          </button>
           <button
             onClick={() => router.push("/")}
-            className="rounded-lg border border-[#1a5a8a] bg-[#1a5a8a] px-8 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition-colors hover:bg-white hover:text-[#1a5a8a]"
+            className={ACTION_CLASS}
             style={{ fontFamily: "var(--font-inter), sans-serif" }}
           >
-            Review Another Document
-          </button>
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(window.location.href);
-            }}
-            className="rounded-lg border border-gray-border px-8 py-3 text-sm uppercase tracking-[0.15em] text-[#1a5a8a] transition-colors hover:border-[#1a5a8a] hover:bg-[#1a5a8a] hover:text-white"
-            style={{ fontFamily: "var(--font-inter), sans-serif" }}
-          >
-            Share This Review
+            New document
           </button>
         </div>
+
+        <p
+          className="mt-10 text-center text-sm text-gray-light"
+          style={{ fontFamily: "var(--font-inter), sans-serif" }}
+        >
+          Reviewed against James Raybould&apos;s bar for executive documents.
+        </p>
       </div>
     </div>
   );

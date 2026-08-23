@@ -11,7 +11,13 @@ const SCALE_ITEMS = [
   { n: 7, label: "Crystal Clear", color: "#1a6b35", stamp: "/stamps/crystal-clear.png" },
 ];
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ previous?: string }>;
+}) {
+  const { previous } = await searchParams;
+
   return (
     <div className="flex min-h-screen flex-col items-center px-6 pt-16 pb-16">
       <div className="w-full max-w-2xl text-center">
@@ -95,13 +101,21 @@ export default function Home() {
         {/* Input */}
         <div className="mt-8">
           <p className="text-lg text-gray md:text-xl">
-            Paste your document below, or add a file.
+            {previous
+              ? "Paste your revised document below, and we'll tell you what changed."
+              : "Paste your document below, or add a file."}
           </p>
         </div>
       </div>
       <div className="mt-4 w-full max-w-lg">
-        <InputArea />
+        <InputArea previousId={previous} />
       </div>
+      <p
+        className="mt-12 text-center text-sm text-gray-light"
+        style={{ fontFamily: "var(--font-inter), sans-serif" }}
+      >
+        Reviewed against James Raybould&apos;s bar for executive documents.
+      </p>
     </div>
   );
 }
