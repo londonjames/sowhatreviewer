@@ -198,8 +198,10 @@ export async function evaluateDocument(
   const client = new Anthropic();
 
   const message = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 4096,
+    model: "claude-opus-5",
+    max_tokens: 16000,
+    thinking: { type: "adaptive" },
+    output_config: { effort: "high" },
     system: SYSTEM_PROMPT,
     tools: [EVALUATION_TOOL],
     tool_choice: { type: "tool", name: "submit_evaluation" },
