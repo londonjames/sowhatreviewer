@@ -3,6 +3,24 @@
 import { useState } from "react";
 import { Rewrite } from "@/lib/types";
 
+/** Render **bold** spans; the model writes rewrites in light markdown. */
+function InlineText({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.startsWith("**") && part.endsWith("**") && part.length > 4 ? (
+          <strong key={i} className="font-semibold">
+            {part.slice(2, -2)}
+          </strong>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+}
+
 /** Render a markdown table when the rewrite is one, otherwise plain paragraphs. */
 function RewriteBody({ text }: { text: string }) {
   const lines = text.trim().split("\n");
@@ -32,7 +50,7 @@ function RewriteBody({ text }: { text: string }) {
                   className="border-b px-3 py-2 text-left font-semibold text-foreground"
                   style={{ borderColor: "#cbd9e4" }}
                 >
-                  {cell}
+                  <InlineText text={cell} />
                 </th>
               ))}
             </tr>
@@ -46,7 +64,7 @@ function RewriteBody({ text }: { text: string }) {
                     className="border-b px-3 py-2 align-top text-gray"
                     style={{ borderColor: "#e8eef3" }}
                   >
-                    {cell}
+                    <InlineText text={cell} />
                   </td>
                 ))}
               </tr>
@@ -63,7 +81,7 @@ function RewriteBody({ text }: { text: string }) {
         .filter((line) => line.trim())
         .map((line, i) => (
           <p key={i} className={i > 0 ? "mt-3" : undefined}>
-            {line}
+            <InlineText text={line} />
           </p>
         ))}
     </>
@@ -113,7 +131,7 @@ function RewriteCard({ rewrite }: { rewrite: Rewrite }) {
           >
             Currently
           </p>
-          <p className="mt-1.5 border-l-2 pl-3 text-base leading-relaxed text-gray-light line-through decoration-gray-light/40">
+          <p className="mt-1.5 border-l-2 border-gray-border pl-3 text-base italic leading-relaxed text-gray-light">
             {rewrite.before}
           </p>
         </div>
