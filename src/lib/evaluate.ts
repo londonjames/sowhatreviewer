@@ -89,7 +89,11 @@ Exactly 3 questions the author will be asked in the room and cannot currently an
 - No hedging in your own feedback: no "you may want to consider", "could potentially". State what is, what isn't, and what to do.
 - Plain words. Short sentences. No throat-clearing, no filler praise.
 - British English spellings (organisation, prioritise, analyse). No em-dashes; use commas, colons, or full stops.
-- Never claim something is missing without verifying against what is actually there.`;
+- Never claim something is missing without verifying against what is actually there.
+
+## Citing Location
+
+Uploaded files arrive with location markers: [Page 3] for PDFs, [Slide 7] for decks, and speaker notes marked as such. When the document carries these markers, cite them in your feedback and action items so the author can find what you mean: "the ask first appears on slide 9", "move the payback table from page 6 to page 1". Never invent a page or slide number, and never repeat the markers themselves back as if they were part of the author's prose.`;
 
 function categoryProperties(key: string, label: string) {
   return {
