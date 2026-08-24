@@ -121,16 +121,23 @@ export async function POST(request: NextRequest) {
       };
 
       try {
-        let lastSent = 0;
+        let lastPartial = 0;
+        let lastThinking = 0;
         const evaluation = await evaluateDocument(text, {
           context,
           previous,
           onPartial: (partialJson) => {
             // Throttle: the reveal only needs to keep up with the eye.
             const now = Date.now();
-            if (now - lastSent < 120) return;
-            lastSent = now;
+            if (now - lastPartial < 120) return;
+            lastPartial = now;
             send({ type: "partial", json: partialJson });
+          },
+          onThinking: (thinking) => {
+            const now = Date.now();
+            if (now - lastThinking < 400) return;
+            lastThinking = now;
+            send({ type: "thinking", text: thinking });
           },
         });
 

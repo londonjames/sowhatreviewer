@@ -265,6 +265,8 @@ export interface EvaluateOptions {
   previous?: { overall: number; actions: string[] };
   /** Called with the accumulated partial tool-input JSON as it streams. */
   onPartial?: (partialJson: string) => void;
+  /** Called with the reviewer's running commentary while it reads. */
+  onThinking?: (text: string) => void;
 }
 
 export async function evaluateDocument(
@@ -276,7 +278,7 @@ export async function evaluateDocument(
   const stream = client.messages.stream({
     model: "claude-opus-5",
     max_tokens: 16000,
-    thinking: { type: "adaptive" },
+    thinking: { type: "adaptive", display: "summarized" },
     output_config: { effort: "high" },
     system: SYSTEM_PROMPT,
     tools: [EVALUATION_TOOL],
@@ -289,21 +291,20 @@ export async function evaluateDocument(
     ],
   });
 
-  if (options.onPartial) {
-    let accumulated = "";
-    stream.on("contentBlock", () => {
-      accumulated = "";
-    });
-    stream.on("streamEvent", (event) => {
-      if (
-        event.type === "content_block_delta" &&
-        event.delta.type === "input_json_delta"
-      ) {
-        accumulated += event.delta.partial_json;
-        options.onPartial?.(accumulated);
-      }
-    });
-  }
+  // Most of the wall clock is thinking, not output, so surface both: the
+  // running commentary while it reads, then the evaluation as it is written.
+  let accumulatedJson = "";
+  let accumulatedThinking = "";
+  stream.on("streamEvent", (event) => {
+    if (event.type !== "content_block_delta") return;
+    if (event.delta.type === "input_json_delta") {
+      accumulatedJson += event.delta.partial_json;
+      options.onPartial?.(accumulatedJson);
+    } else if (event.delta.type === "thinking_delta") {
+      accumulatedThinking += event.delta.thinking;
+      options.onThinking?.(accumulatedThinking);
+    }
+  });
 
   const message = await stream.finalMessage();
 

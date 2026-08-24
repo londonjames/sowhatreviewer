@@ -12,6 +12,22 @@ export interface ShapeOptions {
   previousOverall?: number;
 }
 
+/**
+ * The model sometimes emits the tool call wrapped in its own envelope, e.g.
+ * {"parameters": {...}} rather than the bare argument object. Unwrap a lone
+ * envelope key so field lookups work either way.
+ */
+function unwrapEnvelope(
+  input: Record<string, unknown>
+): Record<string, unknown> {
+  const keys = Object.keys(input);
+  if (keys.length !== 1) return input;
+  if (!["parameters", "input", "arguments"].includes(keys[0])) return input;
+  const inner = input[keys[0]];
+  if (!inner || typeof inner !== "object" || Array.isArray(inner)) return input;
+  return inner as Record<string, unknown>;
+}
+
 function clampScore(score: number): number {
   const clamped = Math.max(0.5, Math.min(5.0, score));
   return Math.round(clamped * 2) / 2;
@@ -75,9 +91,10 @@ function shapeRewrites(value: unknown): Rewrite[] | undefined {
  * the same code path renders a mid-stream fragment and a finished evaluation.
  */
 export function shapeResult(
-  input: Record<string, unknown>,
+  rawInput: Record<string, unknown>,
   options: ShapeOptions = {}
 ): Partial<EvaluationResult> {
+  const input = unwrapEnvelope(rawInput);
   const result: Partial<EvaluationResult> = {};
 
   const verdict = str(input.verdict);

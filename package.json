@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.88.0",
+    "@anthropic-ai/sdk": "^0.120.0",
     "@upstash/redis": "^1.37.0",
     "cfb": "^1.2.2",
     "jszip": "^3.10.1",
