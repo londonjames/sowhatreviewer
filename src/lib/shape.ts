@@ -17,7 +17,7 @@ export interface ShapeOptions {
  * {"parameters": {...}} rather than the bare argument object. Unwrap a lone
  * envelope key so field lookups work either way.
  */
-function unwrapEnvelope(
+export function unwrapEnvelope(
   input: Record<string, unknown>
 ): Record<string, unknown> {
   const keys = Object.keys(input);
@@ -162,4 +162,30 @@ export function shapeResult(
   }
 
   return result;
+}
+
+/** Fields a usable evaluation carries, used to pick between candidate tool blocks. */
+const EXPECTED_FIELDS = [
+  "verdict",
+  "mirror_lead",
+  "mirror_bullets",
+  "intent",
+  "delivery",
+  "narrative",
+  "intent_headline",
+  "delivery_headline",
+  "narrative_headline",
+  "rewrites",
+  "red_team",
+];
+
+/**
+ * How much of the expected evaluation a raw tool input actually contains. The
+ * model occasionally emits a stray or abandoned tool block alongside the real
+ * one, so we choose by completeness rather than by position.
+ */
+export function completeness(input: Record<string, unknown>): number {
+  const unwrapped = unwrapEnvelope(input);
+  return EXPECTED_FIELDS.filter((field) => unwrapped[field] !== undefined)
+    .length;
 }

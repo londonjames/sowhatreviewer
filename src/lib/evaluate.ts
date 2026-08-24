@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { DocumentContext, EvaluationResult } from "./types";
-import { shapeResult } from "./shape";
+import { completeness, shapeResult } from "./shape";
 
 // SOURCE OF JUDGMENT: this prompt is distilled from TASTE.md (repo root) — the canonical
 // rubric of James's document standards. Edit taste there, then re-distil here. Never here first.
@@ -307,22 +307,36 @@ export async function evaluateDocument(
 
   const message = await stream.finalMessage();
 
-  // Take the last submit_evaluation block: when the model corrects itself,
-  // the earlier block holds the abandoned attempt.
-  const toolBlocks = message.content.filter(
+  // The model sometimes emits a stray or abandoned tool block beside the real
+  // one, so pick the most complete candidate rather than the first or last.
+  const candidates = message.content.filter(
     (block): block is Anthropic.Messages.ToolUseBlock =>
       block.type === "tool_use" && block.name === EVALUATION_TOOL.name
   );
-  const toolBlock = toolBlocks[toolBlocks.length - 1];
-  if (!toolBlock) {
+  if (!candidates.length) {
     throw new Error("No evaluation returned from Claude");
   }
 
-  return buildResult(
-    toolBlock.input as Record<string, unknown>,
+  const best = candidates.reduce((chosen, block) =>
+    completeness(block.input as Record<string, unknown>) >=
+    completeness(chosen.input as Record<string, unknown>)
+      ? block
+      : chosen
+  );
+
+  const result = buildResult(
+    best.input as Record<string, unknown>,
     options.context,
     options.previous
   );
+
+  // A result missing its scores or verdict is a failed generation. Surfacing
+  // the error beats rendering a confident 0/100 "Nope" the document never earned.
+  if (result.categories.length < 3 || !result.verdict.trim()) {
+    throw new Error("Incomplete evaluation returned from Claude");
+  }
+
+  return result;
 }
 
 /** Shape the finished tool input, filling defaults for anything the model omitted. */
