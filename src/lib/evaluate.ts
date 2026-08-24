@@ -265,8 +265,6 @@ export interface EvaluateOptions {
   previous?: { overall: number; actions: string[] };
   /** Called with the accumulated partial tool-input JSON as it streams. */
   onPartial?: (partialJson: string) => void;
-  /** Called with the reviewer's running commentary while it reads. */
-  onThinking?: (text: string) => void;
 }
 
 export async function evaluateDocument(
@@ -278,7 +276,7 @@ export async function evaluateDocument(
   const stream = client.messages.stream({
     model: "claude-opus-5",
     max_tokens: 16000,
-    thinking: { type: "adaptive", display: "summarized" },
+    thinking: { type: "adaptive" },
     output_config: { effort: "high" },
     system: SYSTEM_PROMPT,
     tools: [EVALUATION_TOOL],
@@ -291,27 +289,31 @@ export async function evaluateDocument(
     ],
   });
 
-  // Most of the wall clock is thinking, not output, so surface both: the
-  // running commentary while it reads, then the evaluation as it is written.
+  // The model can emit more than one tool_use block, discarding a botched
+  // first attempt before writing a correct one. Accumulate per block so a
+  // discarded attempt is never concatenated onto the real evaluation.
   let accumulatedJson = "";
-  let accumulatedThinking = "";
   stream.on("streamEvent", (event) => {
-    if (event.type !== "content_block_delta") return;
-    if (event.delta.type === "input_json_delta") {
+    if (event.type === "content_block_start") {
+      accumulatedJson = "";
+    } else if (
+      event.type === "content_block_delta" &&
+      event.delta.type === "input_json_delta"
+    ) {
       accumulatedJson += event.delta.partial_json;
       options.onPartial?.(accumulatedJson);
-    } else if (event.delta.type === "thinking_delta") {
-      accumulatedThinking += event.delta.thinking;
-      options.onThinking?.(accumulatedThinking);
     }
   });
 
   const message = await stream.finalMessage();
 
-  const toolBlock = message.content.find(
+  // Take the last submit_evaluation block: when the model corrects itself,
+  // the earlier block holds the abandoned attempt.
+  const toolBlocks = message.content.filter(
     (block): block is Anthropic.Messages.ToolUseBlock =>
-      block.type === "tool_use"
+      block.type === "tool_use" && block.name === EVALUATION_TOOL.name
   );
+  const toolBlock = toolBlocks[toolBlocks.length - 1];
   if (!toolBlock) {
     throw new Error("No evaluation returned from Claude");
   }

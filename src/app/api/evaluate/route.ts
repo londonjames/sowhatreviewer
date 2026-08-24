@@ -122,7 +122,6 @@ export async function POST(request: NextRequest) {
 
       try {
         let lastPartial = 0;
-        let lastThinking = 0;
         const evaluation = await evaluateDocument(text, {
           context,
           previous,
@@ -132,12 +131,6 @@ export async function POST(request: NextRequest) {
             if (now - lastPartial < 120) return;
             lastPartial = now;
             send({ type: "partial", json: partialJson });
-          },
-          onThinking: (thinking) => {
-            const now = Date.now();
-            if (now - lastThinking < 400) return;
-            lastThinking = now;
-            send({ type: "thinking", text: thinking });
           },
         });
 

@@ -21,17 +21,6 @@ interface InputAreaProps {
   previousId?: string;
 }
 
-/**
- * The reviewer's commentary arrives as a growing block of text. Show only the
- * tail so the reader gets a sense of progress without a wall of reasoning.
- */
-function latestThought(thinking: string): string {
-  const cleaned = thinking.replace(/\s+/g, " ").trim();
-  const sentences = cleaned.split(/(?<=[.!?])\s+/).filter(Boolean);
-  const tail = sentences.slice(-2).join(" ");
-  return tail.length > 240 ? `${tail.slice(-240).trimStart()}` : tail;
-}
-
 export default function InputArea({ previousId }: InputAreaProps) {
   const [text, setText] = useState("");
   const [audience, setAudience] = useState("");
@@ -41,7 +30,6 @@ export default function InputArea({ previousId }: InputAreaProps) {
   const [error, setError] = useState("");
   const [dragOver, setDragOver] = useState(false);
   const [partial, setPartial] = useState<Partial<EvaluationResult>>({});
-  const [thinking, setThinking] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -107,7 +95,6 @@ export default function InputArea({ previousId }: InputAreaProps) {
     setLoading(true);
     setError("");
     setPartial({});
-    setThinking("");
 
     const shapeOptions = {
       context: {
@@ -154,9 +141,7 @@ export default function InputArea({ previousId }: InputAreaProps) {
             continue;
           }
 
-          if (event.type === "thinking") {
-            setThinking((event.text as string) || "");
-          } else if (event.type === "partial") {
+          if (event.type === "partial") {
             const parsed = parsePartialJson(event.json as string);
             // A fragment that can't be salvaged just means nothing new yet.
             if (parsed) setPartial(shapeResult(parsed, shapeOptions));
@@ -218,11 +203,6 @@ export default function InputArea({ previousId }: InputAreaProps) {
                 />
               ))}
             </div>
-            {thinking && (
-              <p className="max-w-lg text-center text-base leading-relaxed text-gray-light">
-                {latestThought(thinking)}
-              </p>
-            )}
           </>
         )}
         {hasContent && (
