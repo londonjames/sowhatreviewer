@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { trackStream } from "./usage-logger";
 import { DocumentContext, EvaluationResult } from "./types";
 import { completeness, shapeResult } from "./shape";
 
@@ -273,11 +274,12 @@ export interface EvaluateOptions {
 
 export async function evaluateDocument(
   text: string,
-  options: EvaluateOptions = {}
+  options: EvaluateOptions = {},
+  source?: string
 ): Promise<EvaluationResult> {
   const client = new Anthropic();
 
-  const stream = client.messages.stream({
+  const stream = trackStream("sowhat", "evaluate", client.messages.stream({
     model: "claude-opus-5",
     max_tokens: 16000,
     thinking: { type: "adaptive" },
@@ -291,7 +293,7 @@ export async function evaluateDocument(
         content: buildUserContent(text, options.context, options.previous),
       },
     ],
-  });
+  }), { source });
 
   // The model can emit more than one tool_use block, discarding a botched
   // first attempt before writing a correct one. Accumulate per block so a

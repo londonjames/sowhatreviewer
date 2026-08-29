@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { requestSource } from "@/lib/request-source";
 import { evaluateDocument } from "@/lib/evaluate";
 import { saveReview, getReview } from "@/lib/redis";
 import { DocumentContext, EvaluationResult } from "@/lib/types";
@@ -113,6 +114,10 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Resolve before the stream: cookies() only works in the request scope, and
+  // the ReadableStream callbacks run after the handler has returned.
+  const source = await requestSource();
+
   const stream = new ReadableStream({
     async start(controller) {
       let closed = false;
@@ -132,7 +137,7 @@ export async function POST(request: NextRequest) {
             lastPartial = now;
             send({ type: "partial", json: partialJson });
           },
-        });
+        }, source);
 
         const id =
           Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
