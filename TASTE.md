@@ -1,7 +1,8 @@
 # TASTE.md — How James Judges a Document
 
 **CANONICAL COPY.** This file is the single source of truth for James Raybould's document judgment.
-Every tool that applies his taste (whatsthesowhat.jamesraybould.me, doc-reviewer, future skills) derives its prompt from this file.
+Every tool that applies his taste (whatsthesowhat.jamesraybould.me, doc-reviewer, the Inbound Reviewer, future skills) derives its prompt from this file.
+Sections 1-7 judge a document you are about to send. Sections 8-9 judge one that has just arrived. Both halves are the same taste.
 When this file changes, re-distil into every consumer (listed at the bottom). Never edit taste in a consumer directly.
 
 Built from his published writing, his shipped reviewer prompts (sowhat, document-reviewer, Profiler), and his recorded corrections.
@@ -136,6 +137,57 @@ The feedback standards:
 
 ---
 
+## 8. Receiving a Document — What James Pushes Back On
+
+<!-- Provenance: sections 1-7 of this file, turned around to face the reader instead of the author;
+     inbound-reviewer spec v1 (2 Sep 2026) sections 5 and 7.3 (would_push_back_on, the draft reply);
+     CLAUDE.md sections 2 and 11 (plain language, explain the why); the recorded correction that a card
+     reading like a public summary has failed. -->
+
+Sections 1-7 judge a document you are about to send. This section judges a document that has
+just landed in your inbox. Same taste, opposite direction: not "how do I improve this" but
+"what do I now know, and what would I challenge".
+
+**The four questions a recipient-side card answers, in this order:**
+
+1. **What is this?** One sentence on what the document is and why it exists.
+2. **What does it want from me?** A decision, an action, or a date. If nothing, say "Nothing asked; for information." Never soften a deadline into "soon".
+3. **What do I already know about it?** Sender, relationship, the last exchange and when, the thread or meeting it belongs to, and any commitment already made. Only what is actually found.
+4. **What would I push back on?** Two or three things, specific to this document.
+
+**Where the pushback comes from.** Run the cardinal questions (section 1) against the document,
+then add the four the recipient can ask and the author cannot:
+
+- **Who is the source, and what do they gain by saying it?** A document built from what interested parties said is evidence about the sayers, not about the world. If the document admits this in a caveat and then ignores its own caveat, that is the finding.
+- **Who else got this, and does the distribution match the content?** Named financials, competitive framing, or client detail sent to a list that includes the subject or their competitors is worth flagging before a meeting, not after.
+- **What is the ask the author forgot to make?** Most inbound documents describe rather than propose. Name the decision the reader is left to make alone.
+- **What is missing that I would need before acting?** The number without a source, the claim the author cannot know, the fake precision (section 4).
+
+**The specificity bar.** A card that could have been written by someone who only read the
+document has failed. Every card must carry at least one thing that could only have come from
+James's own email, calendar, or notes. No invented context, and no filler: "you may have
+discussed this before" is worse than saying nothing.
+
+**Length.** Each card is readable on a phone in under a minute. The original is one click away
+for anything longer. The summary bullets come after the judgment, not before, because the
+judgment is the point of the card.
+
+## 9. Replying in James's Voice
+
+<!-- Provenance: inbound-reviewer spec v1 section 7.3; q/lib/q/voice.ts (the live voice profile,
+     refreshed weekly by crons/refresh-voice) — that file governs phrasing, this section governs shape. -->
+
+Drafts only. Nothing is ever sent by the system.
+
+- **Shape:** acknowledge receipt in one line, answer or ask the one thing that matters most, propose the next step or a date. Under 120 words.
+- **If the document asks nothing,** the draft is a two-line acknowledgement. Do not manufacture a question to seem engaged.
+- **If James has already replied in the thread** since the document arrived, do not draft. Note that on the card instead.
+- **One draft per thread.** Update the existing draft rather than adding a second.
+- **Voice** comes from `q/lib/q/voice.ts`, not from this file. This section governs shape and restraint; that file governs phrasing.
+- Section 7's language rules apply to every word of the draft, including the ban on "honest" and its cousins.
+
+---
+
 ## Consumers of this file
 
 When this file changes, re-distil the rules into each consumer's system prompt:
@@ -144,4 +196,5 @@ When this file changes, re-distil the rules into each consumer's system prompt:
 2. `doc-reviewer/lib/analyse-prompt.ts` (doc-reviewer-sigma.vercel.app) — full rubric; synced copy of this file lives at `doc-reviewer/TASTE.md` with a pointer header
 3. `writer` (the writing app, github.com/londonjames/writer) — planned consumer for its ai-review surface. Note: writer owns the sibling asset, the VOICE profile (`api/analyze-voice.js` distils a style guide from writing samples into `voiceProfile`). TASTE judges documents; VOICE writes them. Keep them separate.
 4. `~/.claude/skills/sowhatreviewer/SKILL.md` (`/sowhatreviewer` in Claude Code) — reads this file directly rather than carrying a distilled copy, so it cannot drift. It publishes to the same `sowhat:<id>` store via `scripts/publish.mjs`.
-5. Future: outbound pre-send check, evaluator surfaces, org-facing twin
+5. `~/.claude/skills/inbound/SKILL.md` (the Inbound Reviewer, recipient-side) — reads this file directly, like the sowhatreviewer skill, so it cannot drift. Uses sections 1-4 and 8 for `would_push_back_on`, and section 9 for the draft reply. Writes cards to the Q Inbound feed.
+6. Future: outbound pre-send check, evaluator surfaces, org-facing twin
