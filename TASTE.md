@@ -1,7 +1,7 @@
 # TASTE.md — How James Judges a Document
 
 **CANONICAL COPY.** This file is the single source of truth for James Raybould's document judgment.
-Every tool that applies his taste (whatsthesowhat.jamesraybould.me, doc-reviewer, the Inbound Reviewer, future skills) derives its prompt from this file.
+Every tool that applies his taste (whatsthesowhat.jamesraybould.me, doc-reviewer, Crux, future skills) derives its prompt from this file.
 Sections 1-7 judge a document you are about to send. Sections 8-9 judge one that has just arrived. Both halves are the same taste.
 When this file changes, re-distil into every consumer (listed at the bottom). Never edit taste in a consumer directly.
 
@@ -140,7 +140,7 @@ The feedback standards:
 ## 8. Receiving a Document — What James Pushes Back On
 
 <!-- Provenance: sections 1-7 of this file, turned around to face the reader instead of the author;
-     inbound-reviewer spec v1 (2 Sep 2026) sections 5 and 7.3 (would_push_back_on, the draft reply);
+     crux spec v1 (2 Sep 2026) sections 5 and 7.3 (would_push_back_on, the draft reply);
      CLAUDE.md sections 2 and 11 (plain language, explain the why); the recorded correction that a card
      reading like a public summary has failed. -->
 
@@ -174,7 +174,7 @@ judgment is the point of the card.
 
 ## 9. Replying in James's Voice
 
-<!-- Provenance: inbound-reviewer spec v1 section 7.3; q/lib/q/voice.ts (the live voice profile,
+<!-- Provenance: crux spec v1 section 7.3; q/lib/q/voice.ts (the live voice profile,
      refreshed weekly by crons/refresh-voice) — that file governs phrasing, this section governs shape. -->
 
 Drafts only. Nothing is ever sent by the system.
@@ -196,5 +196,5 @@ When this file changes, re-distil the rules into each consumer's system prompt:
 2. `doc-reviewer/lib/analyse-prompt.ts` (doc-reviewer-sigma.vercel.app) — full rubric; synced copy of this file lives at `doc-reviewer/TASTE.md` with a pointer header
 3. `writer` (the writing app, github.com/londonjames/writer) — planned consumer for its ai-review surface. Note: writer owns the sibling asset, the VOICE profile (`api/analyze-voice.js` distils a style guide from writing samples into `voiceProfile`). TASTE judges documents; VOICE writes them. Keep them separate.
 4. `~/.claude/skills/sowhatreviewer/SKILL.md` (`/sowhatreviewer` in Claude Code) — reads this file directly rather than carrying a distilled copy, so it cannot drift. It publishes to the same `sowhat:<id>` store via `scripts/publish.mjs`.
-5. `~/.claude/skills/inbound/SKILL.md` (the Inbound Reviewer, recipient-side) — reads this file directly, like the sowhatreviewer skill, so it cannot drift. Uses sections 1-4 and 8 for `would_push_back_on`, and section 9 for the draft reply. Writes cards to the Q Inbound feed.
+5. `q/.claude/skills/crux/SKILL.md` (Crux, recipient-side, `/crux` in Claude Code) — reads this file directly, like the sowhatreviewer skill, so it cannot drift. Uses sections 1-4 and 8 for `would_push_back_on`, and section 9 for the draft reply. Writes cards to the Q Crux feed at q.jamesraybould.me/crux.
 6. Future: outbound pre-send check, evaluator surfaces, org-facing twin
