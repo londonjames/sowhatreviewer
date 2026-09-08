@@ -65,6 +65,7 @@ function rows(value: unknown): Record<string, unknown>[] {
 }
 
 export function shapeChallenge(input: Record<string, unknown>): ShapedChallenge {
+  const questions = shapeQuestions(input.questions);
   const docTypeRaw = str(input.doc_type);
   const docType = VALID_DOC_TYPES.has(docTypeRaw)
     ? (docTypeRaw as DocType)
@@ -80,8 +81,11 @@ export function shapeChallenge(input: Record<string, unknown>): ShapedChallenge 
     title: str(input.title),
     verdict: str(input.verdict),
     top_fixes: strArray(input.top_fixes, 3),
-    categories: shapeCategories(input.categories),
-    questions: shapeQuestions(input.questions),
+    categories: enforceNotApplicable(
+      shapeCategories(input.categories),
+      questions
+    ),
+    questions,
     proposed_overall: shapeProposed(input.proposed_overall),
     progress_summary: str(input.progress_summary),
     progress_addressed: strArray(input.progress_addressed),
@@ -151,6 +155,51 @@ function shapeQuestions(value: unknown): QuestionVerdict[] {
       QUESTIONS.findIndex((q) => q.id === a.id) -
       QUESTIONS.findIndex((q) => q.id === b.id)
   );
+}
+
+/**
+ * A category whose every question fell away is not applicable, whatever score the
+ * model attached to it.
+ *
+ * Asked in the prompt, this rule does not hold: a status update came back with
+ * The Cost scored 3, an empty body, and a headline stating the not-applicable bar
+ * was met. The words and the number disagreed, and the number was the one that
+ * reached the cap. So it is computed here instead, like the cap itself.
+ *
+ * Only categories that carry an explicit bar can be waived. Where there is no
+ * bar, a document is always judged, and the model is told to judge it against
+ * what its own document type should carry.
+ */
+function enforceNotApplicable(
+  categories: CategoryVerdict[],
+  questions: QuestionVerdict[]
+): CategoryVerdict[] {
+  const statusById = new Map(questions.map((q) => [q.id, q.status]));
+
+  return categories.map((category) => {
+    const definition = CATEGORIES.find((c) => c.id === category.id);
+    if (!definition?.naBar || category.score === null) return category;
+
+    const owned = QUESTIONS.filter((q) => q.category === category.id);
+    const judged = owned.filter((q) => statusById.has(q.id));
+
+    // Every question answered, and every one of them waived.
+    const allWaived =
+      judged.length === owned.length &&
+      judged.length > 0 &&
+      judged.every((q) => statusById.get(q.id) === "not-applicable");
+    if (!allWaived) return category;
+
+    return {
+      ...category,
+      score: null,
+      naReason:
+        category.naReason ||
+        category.body ||
+        category.headline ||
+        "None of this category's questions apply to this document.",
+    };
+  });
 }
 
 /** Counts for the ledger heading, e.g. "14 of 18 answered". */
