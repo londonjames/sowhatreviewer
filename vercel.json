@@ -2,6 +2,9 @@
   "functions": {
     "src/app/api/evaluate/route.ts": {
       "maxDuration": 60
+    },
+    "src/app/api/team-evaluate/route.ts": {
+      "maxDuration": 300
     }
   }
 }

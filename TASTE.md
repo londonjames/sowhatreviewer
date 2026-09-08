@@ -5,6 +5,10 @@ Every tool that applies his taste (whatsthesowhat.jamesraybould.me, doc-reviewer
 Sections 1-7 judge a document you are about to send. Sections 8-9 judge one that has just arrived. Both halves are the same taste.
 When this file changes, re-distil into every consumer (listed at the bottom). Never edit taste in a consumer directly.
 
+This file covers **craft**: whether the argument is well made. Its sibling, `QUESTIONS.md`, covers **challenge**:
+whether the thinking behind the document holds up (assumed constraints, lazy resource asks, unrequested problems).
+A document can clear this file and still fail that one. Neither restates the other; keep it that way.
+
 Built from his published writing, his shipped reviewer prompts (sowhat, document-reviewer, Profiler), and his recorded corrections.
 Every rule traces to demonstrated evidence; provenance is cited per section in HTML comments.
 Do not add taste he hasn't demonstrated.
@@ -197,4 +201,5 @@ When this file changes, re-distil the rules into each consumer's system prompt:
 3. `writer` (the writing app, github.com/londonjames/writer) — planned consumer for its ai-review surface. Note: writer owns the sibling asset, the VOICE profile (`api/analyze-voice.js` distils a style guide from writing samples into `voiceProfile`). TASTE judges documents; VOICE writes them. Keep them separate.
 4. `~/.claude/skills/sowhatreviewer/SKILL.md` (`/sowhatreviewer` in Claude Code) — reads this file directly rather than carrying a distilled copy, so it cannot drift. It publishes to the same `sowhat:<id>` store via `scripts/publish.mjs`.
 5. `q/.claude/skills/crux/SKILL.md` (Crux, recipient-side, `/crux` in Claude Code) — reads this file directly, like the sowhatreviewer skill, so it cannot drift. Uses sections 1-4 and 8 for `would_push_back_on`, and section 9 for the draft reply. Writes cards to the Q Crux feed at q.jamesraybould.me/crux.
-6. Future: outbound pre-send check, evaluator surfaces, org-facing twin
+6. `sowhat/src/lib/team-prompt.ts` (the team reviewer, `whatsthesowhat.jamesraybould.me/team`) — James's team put a document through it before sending it to him. It judges a second axis that this file does not cover: whether the *thinking* holds up, not whether the argument is well made. Those questions live in `QUESTIONS.md` (repo root), which is canonical for the challenge axis exactly as this file is canonical for craft. The reviewer runs both: the challenge layer from `team-prompt.ts`, and craft by calling `lib/evaluate.ts` unchanged, so sections 1-7 are never restated and cannot drift. Nothing to re-distil here when this file changes.
+7. Future: outbound pre-send check, evaluator surfaces, org-facing twin
