@@ -1,14 +1,14 @@
 /**
  * One shared password for the team reviewer.
  *
- * The cookie holds a derivation of the password rather than the password itself,
- * so a copied cookie does not hand over the phrase people type. It is a fast
- * non-cryptographic hash, not a security boundary: the boundary here is the
- * password, and the whole scheme assumes the team can be trusted with it. The
- * gate exists to keep drafts off the open web, not to withstand an attacker.
+ * The cookie holds a SHA-256 derivation of the password rather than the password
+ * itself, so a copied cookie does not hand over the phrase people type, and the
+ * value carries enough entropy that guessing it is not a route in. The boundary
+ * is still the password: the scheme assumes the team can be trusted with it, and
+ * exists to keep unpublished drafts off the open web.
  *
- * Synchronous by necessity: middleware compares the cookie on every gated request
- * and the edge runtime's crypto.subtle is async.
+ * Async throughout because the proxy runs on the edge runtime, where the only
+ * digest available is `crypto.subtle`.
  */
 export const TEAM_COOKIE = "sowhat_team";
 
@@ -16,26 +16,43 @@ export function teamPassword(): string {
   return (process.env.TEAM_PASSWORD || "").trim();
 }
 
-export function teamCookieValue(): string | null {
+/**
+ * A fixed salt, so the cookie is not a bare hash of a guessable phrase that would
+ * fall to a rainbow table. It is compiled in rather than configured: a second env
+ * var that could go missing would silently invalidate every session.
+ */
+const SALT = "sowhat-team-v1";
+
+export async function teamCookieValue(): Promise<string | null> {
   const password = teamPassword();
   if (!password) return null;
-  return hash(`sowhat-team:${password}`);
+  return sha256Hex(`${SALT}:${password}`);
 }
 
+/** Constant-time, so a wrong password reveals nothing through response timing. */
 export function checkPassword(supplied: string): boolean {
   const expected = teamPassword();
   if (!expected) return false;
-  return supplied.trim() === expected;
+  return timingSafeEqual(supplied.trim(), expected);
 }
 
-/** FNV-1a, 32-bit, hex. Deterministic and dependency-free. */
-function hash(input: string): string {
-  let h = 0x811c9dc5;
-  for (let i = 0; i < input.length; i++) {
-    h ^= input.charCodeAt(i);
-    h = Math.imul(h, 0x01000193);
+export function timingSafeEqual(a: string, b: string): boolean {
+  // Comparing lengths first would leak the length, so compare over the longer of
+  // the two and fold any length difference into the result.
+  const length = Math.max(a.length, b.length);
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < length; i++) {
+    diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
   }
-  return (h >>> 0).toString(16).padStart(8, "0");
+  return diff === 0;
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const bytes = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 /**
@@ -47,9 +64,10 @@ function hash(input: string): string {
  * expensive thing here is an Opus call, so the API verifies for itself.
  */
 export async function hasTeamAccess(): Promise<boolean> {
-  const expected = teamCookieValue();
+  const expected = await teamCookieValue();
   if (!expected) return false;
   const { cookies } = await import("next/headers");
   const jar = await cookies();
-  return jar.get(TEAM_COOKIE)?.value === expected;
+  const supplied = jar.get(TEAM_COOKIE)?.value;
+  return !!supplied && timingSafeEqual(supplied, expected);
 }

@@ -91,6 +91,13 @@ Then a headline of at most 15 words, plain and specific, describing what is true
 
 Score the document in front of you, not the effort behind it. Length, research and polish are not scores.
 
+**When most of a category's questions do not apply.** A weekly status update proposes nothing, so most of the questions about proposals do not fire on it. Two rules follow:
+
+- If every question in a category is not-applicable and the category has a not-applicable bar, mark the whole category not applicable and say why. Do not score it in the middle instead. A category headline that describes the not-applicable bar being met and a score of 3 beside it is a contradiction, and the contradiction is the error.
+- If the category has no not-applicable bar, score it on what this type of document should carry, not on the absence of things that were never relevant. A weekly status does not need a list of sign-offs, so The Room is scored on whether it names the people its work depends on and whether their view is recorded, not on whether anyone approved it. Marking a status update down for lacking a board reviewer is a false criticism, and false criticism is the one thing this reviewer must never produce.
+
+The rule underneath both: the words and the number must agree. If your body text says the document does everything this category asks of a document of this type, the score is high, whatever is missing that a different type would have needed.
+
 ## Step 4: the verdict and the fixes
 
 One sentence, maximum 20 words, on the state of the document.

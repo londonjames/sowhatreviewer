@@ -7,7 +7,17 @@ const SANS = { fontFamily: "var(--font-inter), sans-serif" };
 
 function LoginForm() {
   const params = useSearchParams();
-  const next = params.get("next") || "/team";
+
+  // Only ever follow a same-origin path. `next` arrives in the URL, so without
+  // this the login page would forward anyone who clicked a crafted link to an
+  // attacker's site carrying the trust of this domain.
+  const requested = params.get("next") || "/team";
+  const next =
+    requested.startsWith("/") &&
+    !requested.startsWith("//") &&
+    !requested.startsWith("/\\")
+      ? requested
+      : "/team";
 
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

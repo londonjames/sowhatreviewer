@@ -98,3 +98,29 @@ export async function countTeamReviewToday(limit: number): Promise<{
     return { count: 0, allowed: true };
   }
 }
+
+/**
+ * Login attempt limiting, per IP per hour.
+ *
+ * One shared password is guessable given enough tries, and the login endpoint is
+ * the only place those tries can be made. The window is an hour so a fat-fingered
+ * teammate is never locked out for long, and the counter expires with it.
+ *
+ * A Redis outage returns allowed, matching the daily cap: losing the limiter is a
+ * better failure than locking the team out of their own tool.
+ */
+export async function countLoginAttempt(
+  ip: string,
+  limit: number
+): Promise<boolean> {
+  const r = getRedis();
+  if (!r) return true;
+  const hour = new Date().toISOString().slice(0, 13);
+  try {
+    const count = await r.incr(`teamlogin:${hour}:${ip}`);
+    if (count === 1) await r.expire(`teamlogin:${hour}:${ip}`, 60 * 60);
+    return count <= limit;
+  } catch {
+    return true;
+  }
+}

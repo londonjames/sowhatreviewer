@@ -16,7 +16,7 @@
  */
 import { NextResponse, type NextRequest } from "next/server";
 import { INTERNAL_COOKIE } from "@/lib/request-source";
-import { TEAM_COOKIE, teamCookieValue } from "@/lib/team-auth";
+import { TEAM_COOKIE, teamCookieValue, timingSafeEqual } from "@/lib/team-auth";
 
 const YEAR = 60 * 60 * 24 * 365;
 
@@ -32,13 +32,13 @@ function isGated(pathname: string): boolean {
   return GATED.some((pattern) => pattern.test(pathname));
 }
 
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (isGated(pathname)) {
-    const expected = teamCookieValue();
+    const expected = await teamCookieValue();
     const supplied = req.cookies.get(TEAM_COOKIE)?.value;
-    if (!expected || supplied !== expected) {
+    if (!expected || !supplied || !timingSafeEqual(supplied, expected)) {
       // The API answers with a status the client can act on; pages get the form.
       if (pathname.startsWith("/api/")) {
         return NextResponse.json(
