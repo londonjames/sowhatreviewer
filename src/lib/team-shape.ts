@@ -81,8 +81,8 @@ export function shapeChallenge(input: Record<string, unknown>): ShapedChallenge 
     title: str(input.title),
     verdict: str(input.verdict),
     top_fixes: strArray(input.top_fixes, 3),
-    categories: enforceNotApplicable(
-      shapeCategories(input.categories),
+    categories: backfillBodies(
+      enforceNotApplicable(shapeCategories(input.categories), questions),
       questions
     ),
     questions,
@@ -199,6 +199,34 @@ function enforceNotApplicable(
         category.headline ||
         "None of this category's questions apply to this document.",
     };
+  });
+}
+
+/**
+ * A scored category with no body renders as a headline over blank space, which
+ * tells the author a category is imperfect without saying why. The model does
+ * leave it empty occasionally, so where it does, the notes from that category's
+ * own unanswered questions stand in. They are the same judgment at finer grain,
+ * and they cite locations, so nothing is invented to fill the gap.
+ */
+function backfillBodies(
+  categories: CategoryVerdict[],
+  questions: QuestionVerdict[]
+): CategoryVerdict[] {
+  const byId = new Map(questions.map((q) => [q.id, q]));
+
+  return categories.map((category) => {
+    if (category.score === null || category.body) return category;
+
+    const notes = QUESTIONS.filter((q) => q.category === category.id)
+      .map((q) => byId.get(q.id))
+      .filter(
+        (v): v is QuestionVerdict =>
+          !!v && v.status !== "answered" && v.status !== "not-applicable" && !!v.note
+      )
+      .map((v) => v.note.replace(/\s*$/, "").replace(/\.?$/, "."));
+
+    return notes.length ? { ...category, body: notes.join(" ") } : category;
   });
 }
 
