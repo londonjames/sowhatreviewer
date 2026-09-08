@@ -5,6 +5,21 @@ import { DOC_TYPE_LABELS } from "@/lib/questions";
 
 const SANS = { fontFamily: "var(--font-inter), sans-serif" };
 
+const COUNT_WORD = ["No", "One", "Two", "Three"];
+
+/**
+ * A document that scores four or five has already been told it is ready, so
+ * heading its list "before this reaches James" contradicts the verdict directly
+ * above it. At that point the fixes are sharpening, not gating.
+ */
+function fixesHeading(count: number, overall: number): string {
+  const word = COUNT_WORD[count] ?? String(count);
+  const noun = count === 1 ? "thing" : "things";
+  return overall >= 4
+    ? `${word} ${noun} that would sharpen it`
+    : `${word} ${noun} before this reaches James`;
+}
+
 function BigStars({ filled, color }: { filled: number; color: string }) {
   return (
     <div className="flex items-center gap-1.5" aria-label={`${filled} out of 5`}>
@@ -81,9 +96,7 @@ export default function OverallCard({
             className="text-xs font-semibold uppercase tracking-[0.18em] text-gray"
             style={SANS}
           >
-            {fixes.length === 1
-              ? "One thing before this reaches James"
-              : `${fixes.length === 2 ? "Two" : "Three"} things before this reaches James`}
+            {fixesHeading(fixes.length, overall)}
           </p>
           <ol className="mt-4 space-y-3">
             {fixes.map((fix, i) => (
