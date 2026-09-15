@@ -12,6 +12,10 @@
  *   node publish.mjs --file <review.json>   → writes it, prints the URL
  *   node publish.mjs --show <id>            → print a stored review
  *   node publish.mjs --list                 → recent reviews
+ *
+ * Credentials: environment variables first, then .env.local if it exists. In a cloud
+ * session (CLAUDE_CODE_REMOTE=true) the token is absent and the proxy attaches it. Any
+ * failed request prints one UNAVAILABLE line and exits 3.
  */
 
 import fs from "fs";
@@ -19,30 +23,52 @@ import path from "path";
 
 const root = path.resolve(import.meta.dirname, "..");
 const SITE = "https://whatsthesowhat.jamesraybould.me";
+const ENV_FILE = path.join(root, ".env.local");
 
-for (const line of fs.readFileSync(path.join(root, ".env.local"), "utf8").split("\n")) {
-  const m = line.match(/^([A-Z_]+)="?([^"]*)"?$/);
-  if (m) process.env[m[1]] ??= m[2];
+if (fs.existsSync(ENV_FILE)) {
+  for (const line of fs.readFileSync(ENV_FILE, "utf8").split("\n")) {
+    const m = line.match(/^([A-Z_]+)="?([^"]*)"?$/);
+    if (m) process.env[m[1]] ??= m[2];
+  }
 }
 
 const URL_ = process.env.KV_REST_API_URL;
 const TOKEN = process.env.KV_REST_API_TOKEN;
-if (!URL_ || !TOKEN) {
-  console.error("Missing KV_REST_API_URL / KV_REST_API_TOKEN in .env.local");
-  process.exit(1);
+const CLOUD = process.env.CLAUDE_CODE_REMOTE === "true";
+
+function unavailable(reason) {
+  console.error(`UNAVAILABLE: sowhat publish — ${reason}`);
+  process.exit(3);
 }
+if (!URL_) unavailable("KV_REST_API_URL not set");
+if (!TOKEN && !CLOUD) unavailable("KV_REST_API_TOKEN not set");
+const HOST = URL.canParse(URL_) ? new URL(URL_).host : URL_;
 
 async function redis(args) {
-  const res = await fetch(URL_, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${TOKEN}`, "Content-Type": "application/json" },
-    body: JSON.stringify(args.map(String)),
-    cache: "no-store",
-  });
-  if (!res.ok) throw new Error(`redis ${res.status}: ${await res.text()}`);
-  const { result, error } = await res.json();
-  if (error) throw new Error(`redis: ${error}`);
-  return result;
+  let res, body;
+  try {
+    res = await fetch(URL_, {
+      method: "POST",
+      // No token in a cloud session: send no Authorization header and let the proxy add it.
+      headers: { ...(TOKEN && { Authorization: `Bearer ${TOKEN}` }), "Content-Type": "application/json" },
+      body: JSON.stringify(args.map(String)),
+      cache: "no-store",
+      signal: AbortSignal.timeout(20_000),
+    });
+    body = await res.text();
+  } catch (err) {
+    unavailable(`${HOST} returned ${err.cause?.code ?? err.cause?.message ?? err.name}`);
+  }
+  if (!res.ok) unavailable(`${HOST} returned ${res.status}`);
+  if (!body) unavailable(`${HOST} returned an empty body`);
+  let parsed;
+  try {
+    parsed = JSON.parse(body);
+  } catch {
+    unavailable(`${HOST} returned a non-JSON body`);
+  }
+  if (parsed.error) throw new Error(`redis: ${parsed.error}`);
+  return parsed.result;
 }
 
 /** Mirrors calculateOverall + ratingName in src/lib/types.ts. */

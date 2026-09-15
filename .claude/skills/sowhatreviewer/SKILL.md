@@ -3,9 +3,6 @@ name: sowhatreviewer
 description: Review a business document against James's codified judgment — board decks, strategy memos, investment proposals, client deliverables, internal comms. Scores intent, delivery and narrative, rewrites the weak passages, and red-teams what he'll get asked. Runs locally on the subscription (no API cost) and publishes to whatsthesowhat.jamesraybould.me. Use when James types /sowhatreviewer or /sowhat, pastes or points at a document, or asks whether the So What is clear, to review a deck or memo, or to check something before he sends it.
 ---
 
-<!-- portable copy: lives in this repo so cloud sessions get it -->
-`$REPO` = this repository's root: the working directory in a cloud session, `/Users/jamesraybould/sowhat` locally.
-
 # The So What reviewer, in the terminal
 
 Same reviewer as whatsthesowhat.jamesraybould.me. The difference is where the judgment
@@ -16,12 +13,25 @@ You are not a generic reviewer and not a cheerleader. You apply James's bar, in 
 
 ## Step 1 — Load the judgment
 
+Find the app repo: `$HOME/sowhat` on the Mac, or the attached `londonjames/sowhatreviewer`
+checkout next to the project in a cloud session.
+
+```bash
+SOWHAT="$HOME/sowhat"; [ -d "$SOWHAT" ] || SOWHAT="$(dirname "${CLAUDE_PROJECT_DIR:-$PWD}")/sowhatreviewer"
+[ -f "$SOWHAT/TASTE.md" ] && echo "$SOWHAT" || { echo "UNAVAILABLE: needs repo londonjames/sowhatreviewer attached to the session"; exit 3; }
+```
+
+If a command in this skill prints `UNAVAILABLE` or exits non-zero, tell James in one line
+which capability is missing and stop. Do not review from memory or from general knowledge
+of what a good document looks like. Shell variables do not carry between commands, so use
+the path printed above wherever `$SOWHAT` appears below.
+
 Read both, in this order:
 
 ```
-$REPO/TASTE.md            ← canonical. How James judges a document.
-$REPO/src/lib/evaluate.ts ← SYSTEM_PROMPT (the distilled rubric) and
-                                                   EVALUATION_TOOL (the exact output schema)
+$SOWHAT/TASTE.md            ← canonical. How James judges a document.
+$SOWHAT/src/lib/evaluate.ts ← SYSTEM_PROMPT (the distilled rubric) and
+                              EVALUATION_TOOL (the exact output schema)
 ```
 
 `TASTE.md` is the source of truth and names this skill as one of its consumers. Where the
@@ -35,7 +45,8 @@ compliment is worse than a sharp critique.
 
 ## Step 2 — Get the document and its context
 
-James pastes it, or points you at a file (read it), or gives a URL (fetch it).
+James pastes it, or points you at a file (read it), or gives a URL (fetch it). A cloud
+session blocks most websites; if the fetch fails, ask him to paste the text.
 
 Two questions sharpen the review enormously, so ask if he has not said:
 
@@ -80,14 +91,21 @@ Then:
 cat > /tmp/sowhat-review.json <<'JSON'
 { …the evaluation… }
 JSON
-node $REPO/scripts/publish.mjs --file /tmp/sowhat-review.json
+node "$SOWHAT/scripts/publish.mjs" --file /tmp/sowhat-review.json
 ```
 
 It computes the overall and rating name exactly as the web app does, mints the same id
 shape, and prints the shareable URL. It refuses a review missing a verdict, a score, or
 categories rather than putting a broken page on a shareable address.
 
+If it prints `UNAVAILABLE`, tell James the review could not be published and why, in one
+line. Do not give him a URL.
+
 Other commands: `--show <id>`, `--list`.
+
+Credentials: `KV_REST_API_URL` and `KV_REST_API_TOKEN` from the environment, then
+`$SOWHAT/.env.local` if it exists. In a cloud session the token is not visible and is added
+to the request after it leaves the session.
 
 ## Re-reviews
 
