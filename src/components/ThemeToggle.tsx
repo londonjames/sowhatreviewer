@@ -25,7 +25,7 @@ export default function ThemeToggle() {
       onClick={toggle}
       aria-label="Switch between light and dark mode"
       title="Light or dark"
-      className="fixed right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--home-field-border)] bg-[var(--home-field)] text-[var(--home-ink-2)] transition hover:text-[var(--home-ink)]"
+      className="absolute right-4 top-4 z-10 sm:fixed sm:right-5 sm:top-5 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--home-field-border)] bg-[var(--home-field)] text-[var(--home-ink-2)] transition hover:text-[var(--home-ink)]"
     >
       <svg className="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z" />

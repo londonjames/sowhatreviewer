@@ -89,7 +89,7 @@ export default async function Home({
   const { previous } = await searchParams;
 
   return (
-    <div className="min-h-screen bg-[var(--home-page)] px-6 pt-8 pb-8 text-[var(--home-ink)] transition-colors">
+    <div className="min-h-screen bg-[var(--home-page)] px-6 pt-16 pb-8 sm:pt-8 text-[var(--home-ink)] transition-colors">
       <ThemeToggle />
       <div className="mx-auto w-full max-w-[680px]">
         <h1 className="text-balance text-center text-[30px] font-semibold leading-[1.12] tracking-[-0.03em] sm:text-[40px] lg:whitespace-nowrap">
