@@ -236,9 +236,8 @@ export default function InputArea({ previousId }: InputAreaProps) {
         className={FIELD_CLASS}
       />
       {parseGoogleLink(text) && (
-        <p className="-mt-1 text-left text-sm text-[var(--ui-accent-text)]">
-          Google {parseGoogleLink(text)?.kind === "slides" ? "Slides" : "Docs"} link: we&apos;ll open it and
-          review the file. It needs to be shared as &lsquo;Anyone with the link&rsquo;.
+        <p className="text-left text-sm text-[var(--ui-accent-text)]">
+          {`Google ${parseGoogleLink(text)?.kind === "slides" ? "Slides" : "Docs"} link: we'll open it and review the file. It needs to be shared as ‘Anyone with the link’.`}
         </p>
       )}
 
