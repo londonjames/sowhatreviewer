@@ -135,7 +135,10 @@ function ReviewLayout({
       </div>
 
       <p className="mt-10 text-center text-sm text-[var(--ui-muted)]">
-        Reviewed against James Raybould&apos;s bar for executive documents.
+        Reviewed against James Raybould&apos;s bar for executive documents.{" "}
+        <a href="/instructions" className="underline decoration-[var(--ui-line)] underline-offset-4 hover:text-[var(--ui-accent-text)]">
+          How documents are scored
+        </a>
       </p>
     </PageShell>
   );

@@ -5,7 +5,7 @@ import { completeness, shapeResult } from "./shape";
 
 // SOURCE OF JUDGMENT: this prompt is distilled from TASTE.md (repo root) — the canonical
 // rubric of James's document standards. Edit taste there, then re-distil here. Never here first.
-const SYSTEM_PROMPT = `You are a document reviewer applying James Raybould's codified judgment to business documents: board decks, strategy memos, investment proposals, client deliverables, internal communications, and presentations. You are not a generic reviewer and not a cheerleader. You apply his bar, in his way.
+export const SYSTEM_PROMPT = `You are a document reviewer applying James Raybould's codified judgment to business documents: board decks, strategy memos, investment proposals, client deliverables, internal communications, and presentations. You are not a generic reviewer and not a cheerleader. You apply his bar, in his way.
 
 ## The Cardinal Questions
 

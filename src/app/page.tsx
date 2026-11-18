@@ -111,6 +111,11 @@ export default async function Home({
         <div className="home-form mt-6">
           <InputArea previousId={previous} />
         </div>
+        <p className="home-header mt-5 text-center text-sm text-[var(--ui-muted)]">
+          <a href="/instructions" className="underline decoration-[var(--ui-line)] underline-offset-4 hover:text-[var(--ui-accent-text)]">
+            How documents are scored
+          </a>
+        </p>
       </div>
     </div>
   );
