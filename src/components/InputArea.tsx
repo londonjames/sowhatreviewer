@@ -7,6 +7,7 @@ import { parsePartialJson } from "@/lib/partial-json";
 import { shapeResult } from "@/lib/shape";
 import ReviewBody from "./ReviewBody";
 import { rememberReview } from "@/lib/history";
+import { parseGoogleLink } from "@/lib/google-link";
 
 const ACCEPTED = ".pdf,.docx,.doc,.pptx,.ppt,.txt,.md";
 const ACCEPTED_EXTENSIONS = ["pdf", "docx", "doc", "pptx", "ppt", "txt", "md"];
@@ -224,16 +225,22 @@ export default function InputArea({ previousId }: InputAreaProps) {
       <section className="flex flex-col gap-2.5">
       <StepHeading
         n={1}
-        title={previousId ? "Paste or attach your revised doc" : "Paste or attach your doc"}
+        title={previousId ? "Paste your revised doc or a Google link, or attach a file" : "Paste your doc or a Google link, or attach a file"}
       />
       <textarea
         value={text}
         onChange={handleTextChange}
-        placeholder="Paste your content here"
+        placeholder="Paste your content, or a Google Slides or Docs link"
         rows={3}
         autoFocus
         className={FIELD_CLASS}
       />
+      {parseGoogleLink(text) && (
+        <p className="-mt-1 text-left text-sm text-[var(--ui-accent-text)]">
+          Google {parseGoogleLink(text)?.kind === "slides" ? "Slides" : "Docs"} link: we&apos;ll open it and
+          review the file. It needs to be shared as &lsquo;Anyone with the link&rsquo;.
+        </p>
+      )}
 
       <div
         onDragOver={(e) => {

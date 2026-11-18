@@ -3,6 +3,7 @@ import { requestSource } from "@/lib/request-source";
 import { evaluateDocument } from "@/lib/evaluate";
 import { saveReview, getReview } from "@/lib/redis";
 import { DocumentContext, EvaluationResult } from "@/lib/types";
+import { parseGoogleLink, fetchGoogleFile, GoogleLinkError } from "@/lib/google-link";
 
 export const maxDuration = 300;
 
@@ -86,6 +87,22 @@ export async function POST(request: NextRequest) {
 
   let { text } = parsed;
   const { context, previousId } = parsed;
+
+  // A pasted Google Slides or Docs link: fetch the file and read it like an upload.
+  const link = parseGoogleLink(text);
+  if (link) {
+    try {
+      const { buffer, filename } = await fetchGoogleFile(link);
+      const { extractText } = await import("@/lib/extract");
+      text = await extractText(buffer, filename);
+    } catch (error) {
+      const message =
+        error instanceof GoogleLinkError
+          ? error.message
+          : "Couldn't read that file. Try downloading it as a PDF and dropping it in.";
+      return errorResponse(message, 400);
+    }
+  }
 
   if (text.trim().length < MIN_TEXT_LENGTH) {
     return errorResponse(
