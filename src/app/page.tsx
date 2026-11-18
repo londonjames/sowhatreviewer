@@ -40,7 +40,7 @@ export default async function Home({
 
         {/* 0-100 scale */}
         <div className="relative mx-auto mt-6 w-full max-w-xl px-8">
-          <div className="relative h-[64px]">
+          <div className="relative h-[40px] sm:h-[64px]">
             {STAMPS.map((s) => (
               <Image
                 key={s.label}
@@ -48,7 +48,7 @@ export default async function Home({
                 alt={s.label}
                 width={200}
                 height={100}
-                className="absolute bottom-0 h-auto w-[128px] max-w-none -translate-x-1/2"
+                className="absolute bottom-0 h-auto w-[72px] max-w-none sm:w-[128px] -translate-x-1/2"
                 style={{ left: `${s.at}%` }}
               />
             ))}
