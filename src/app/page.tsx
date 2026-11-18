@@ -1,8 +1,6 @@
 import Image from "next/image";
 import InputArea from "@/components/InputArea";
 
-const SERIF = { fontFamily: "var(--font-garamond), Georgia, serif" };
-
 /**
  * The seven ratings, low to high. Three carry a stamp; the other four show
  * their name. Only the two ends and the middle carry a number.
@@ -25,22 +23,19 @@ export default async function Home({
   const { previous } = await searchParams;
 
   return (
-    <div className="flex min-h-screen flex-col items-center px-6 pt-10 pb-8">
+    <div className="flex min-h-screen flex-col items-center px-6 pt-12 pb-8">
       <div className="w-full max-w-2xl text-center">
-        <h1
-          className="text-3xl font-medium italic tracking-tight md:text-4xl"
-          style={{ ...SERIF, color: "#1a5a8a" }}
-        >
-          Does Your Document Convey A Clear So What?
+        <h1 className="text-[2.1rem] font-semibold leading-tight tracking-[-0.02em] text-[#14324d] md:text-[2.6rem]">
+          Does your document land a clear So What?
         </h1>
-        <p className="mt-3 text-xl text-gray md:text-2xl">
-          Is its <span className="font-bold">intent</span> clear? Does it{" "}
-          <span className="font-bold">deliver</span>? Is there a strong{" "}
-          <span className="font-bold">narrative</span>?
+        <p className="mt-3 text-lg text-gray md:text-xl">
+          Is the <span className="font-semibold text-foreground">intent</span> clear? Does it{" "}
+          <span className="font-semibold text-foreground">deliver</span>? Is there a strong{" "}
+          <span className="font-semibold text-foreground">narrative</span>?
         </p>
 
         {/* Rating scale */}
-        <div className="mt-6 w-full">
+        <div className="mt-8 w-full">
           <div className="flex items-end">
             {SCALE_ITEMS.map((item) => (
               <div key={item.label} className="flex min-w-0 flex-1 justify-center overflow-visible">
@@ -50,7 +45,7 @@ export default async function Home({
                     alt={item.label}
                     width={400}
                     height={200}
-                    className="h-auto w-[96px] max-w-none shrink-0 sm:w-[160px]"
+                    className="h-auto w-[96px] max-w-none shrink-0 mix-blend-multiply sm:w-[160px]"
                     priority
                   />
                 ) : (
@@ -61,13 +56,13 @@ export default async function Home({
           </div>
 
           {/* Line and seven tick marks */}
-          <div className="relative mt-1 h-4">
-            <div className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-black" />
+          <div className="relative mt-2 h-4">
+            <div className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-[#bdb7ab]" />
             <div className="relative flex h-full">
               {SCALE_ITEMS.map((item) => (
                 <div key={item.label} className="flex min-w-0 flex-1 items-start justify-center">
                   <div
-                    className={`w-px bg-black ${item.stamp ? "h-4" : "mt-[3px] h-2.5"}`}
+                    className={`w-px ${item.stamp ? "h-4 bg-[#14324d]" : "mt-[3px] h-2.5 bg-[#bdb7ab]"}`}
                   />
                 </div>
               ))}
@@ -75,15 +70,15 @@ export default async function Home({
           </div>
 
           {/* Numbers at 0, 50 and 100; names under the four unstamped ticks */}
-          <div className="mt-1 flex">
+          <div className="mt-2 flex">
             {SCALE_ITEMS.map((item) => (
-              <div key={item.label} className="flex min-w-0 flex-1 flex-col items-center overflow-visible">
+              <div key={item.label} className="flex min-w-0 flex-1 justify-center overflow-visible">
                 {item.stamp ? (
-                  <span className="text-base font-medium text-foreground">{item.n}</span>
+                  <span className="text-sm font-semibold tabular-nums text-[#14324d]">{item.n}</span>
                 ) : (
                   <span
-                    className="whitespace-nowrap text-sm font-semibold italic sm:text-base"
-                    style={{ ...SERIF, color: item.color }}
+                    className="whitespace-nowrap text-xs font-medium sm:text-sm"
+                    style={{ color: item.color }}
                   >
                     {item.label}
                   </span>
@@ -94,13 +89,10 @@ export default async function Home({
         </div>
       </div>
 
-      <div className="mt-6 w-full max-w-xl">
+      <div className="mt-10 w-full max-w-xl">
         <InputArea previousId={previous} />
       </div>
-      <p
-        className="mt-6 text-center text-sm text-gray-light"
-        style={{ fontFamily: "var(--font-inter), sans-serif" }}
-      >
+      <p className="mt-6 text-center text-sm text-gray-light">
         Reviewed against James Raybould&apos;s bar for executive documents.
       </p>
     </div>

@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #f6f4ef;
   --foreground: #111111;
   --gray: #666666;
   --gray-light: #999999;
-  --gray-border: #e0e0e0;
+  --gray-border: #dedad2;
   --accent: #3b82f6;
   --score-green: #16a34a;
   --score-amber: #d97706;
@@ -28,5 +28,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-garamond), Georgia, serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
 }

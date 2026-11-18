@@ -12,18 +12,18 @@ const ACCEPTED = ".pdf,.docx,.doc,.pptx,.ppt,.txt,.md";
 const ACCEPTED_EXTENSIONS = ["pdf", "docx", "doc", "pptx", "ppt", "txt", "md"];
 
 const FIELD_CLASS =
-  "w-full resize-y rounded-lg border border-gray-border bg-white px-5 py-3 text-lg leading-relaxed text-foreground placeholder:text-gray-light outline-none transition-colors focus:border-foreground";
+  "w-full resize-y rounded-xl border border-gray-border bg-white px-4 py-3 text-base leading-relaxed text-foreground shadow-[0_1px_2px_rgba(20,50,77,0.06)] placeholder:text-[#9a958c] outline-none transition focus:border-[#1a5a8a] focus:ring-4 focus:ring-[#1a5a8a]/10";
 
-
-const SERIF = { fontFamily: "var(--font-garamond), Georgia, serif" };
 
 function StepHeading({ n, title, note }: { n: number; title: string; note?: string }) {
   return (
-    <h2 className="mb-3 text-left text-2xl font-medium text-foreground md:text-[1.6rem]" style={SERIF}>
-      <span className="mr-2 italic text-[#1a5a8a]">{n}.</span>
-      {title}
-      {note && <span className="ml-2 text-lg italic text-gray-light">{note}</span>}
-    </h2>
+    <div className="mb-2.5 text-left">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1a5a8a]">Step {n}</p>
+      <h2 className="mt-1 text-xl font-semibold tracking-[-0.01em] text-foreground">
+        {title}
+        {note && <span className="ml-2 text-base font-normal text-gray-light">{note}</span>}
+      </h2>
+    </div>
   );
 }
 
@@ -198,7 +198,7 @@ export default function InputArea({ previousId }: InputAreaProps) {
       <div className="flex w-full flex-col items-center gap-8 py-8">
         {!hasContent && (
           <>
-            <p className="text-xl italic text-foreground">
+            <p className="text-xl text-foreground">
               Reading your document...
             </p>
             <div className="flex items-center gap-2">
@@ -245,12 +245,12 @@ export default function InputArea({ previousId }: InputAreaProps) {
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`flex cursor-pointer items-center justify-center gap-3 rounded-lg border py-2.5 transition-colors ${
+        className={`flex cursor-pointer items-center justify-center gap-3 rounded-xl border border-dashed py-2.5 transition-colors ${
           dragOver
             ? "border-foreground bg-surface"
             : file
               ? "border-foreground bg-white"
-              : "border-gray-border bg-white hover:border-gray-light"
+              : "border-[#cfc9bd] bg-white/60 hover:border-[#1a5a8a] hover:bg-white"
         }`}
       >
         {file ? (
@@ -259,8 +259,8 @@ export default function InputArea({ previousId }: InputAreaProps) {
             <span className="ml-2 text-gray-light">(click to replace)</span>
           </p>
         ) : (
-          <p className="text-base text-gray-light">
-            Or add a file here (PDF, DOC, DOCX, PPT, PPTX)
+          <p className="text-sm text-gray">
+            Or drop a file here: PDF, Word or PowerPoint
           </p>
         )}
         <input
@@ -295,9 +295,9 @@ export default function InputArea({ previousId }: InputAreaProps) {
       <button
         onClick={handleSubmit}
         disabled={!text.trim() && !file}
-        className="rounded-lg border border-foreground bg-foreground px-10 py-3 text-base font-semibold uppercase tracking-[0.15em] text-white transition-colors hover:bg-white hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+        className="rounded-xl bg-[#14324d] px-10 py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-[#1a5a8a] disabled:cursor-not-allowed disabled:bg-[#14324d]/30 disabled:shadow-none"
       >
-        {previousId ? "Re-review" : "Review"}
+        {previousId ? "Re-review my document" : "Review my document"}
       </button>
     </div>
   );

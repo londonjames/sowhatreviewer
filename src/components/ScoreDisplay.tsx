@@ -25,7 +25,7 @@ export default function ScoreDisplay({ result }: ScoreDisplayProps) {
         alt={result.rating_name}
         width={500}
         height={200}
-        className="h-auto w-[420px]"
+        className="h-auto w-[420px] mix-blend-multiply"
         priority
       />
       <p
