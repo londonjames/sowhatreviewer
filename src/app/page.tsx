@@ -23,9 +23,9 @@ export default async function Home({
   const { previous } = await searchParams;
 
   return (
-    <div className="flex min-h-screen flex-col items-center px-6 pt-12 pb-8">
-      <h1 className="w-full max-w-4xl text-center text-[2rem] font-semibold leading-tight tracking-[-0.02em] text-[#14324d] md:text-[2.5rem] lg:whitespace-nowrap">
-        Does your document convey a clear So What?
+    <div className="flex min-h-screen flex-col items-center px-6 pt-8 pb-6 md:pt-12">
+      <h1 className="w-full max-w-4xl text-center text-[2rem] font-semibold leading-tight tracking-[-0.02em] text-[#14324d] text-balance md:text-[2.5rem] lg:whitespace-nowrap">
+        Does your document convey a clear So&nbsp;What?
       </h1>
       <div className="w-full max-w-2xl text-center">
         <p className="mt-3 text-lg text-gray md:text-xl">
@@ -35,7 +35,7 @@ export default async function Home({
         </p>
 
         {/* Rating scale */}
-        <div className="mt-8 w-full">
+        <div className="mt-6 w-full md:mt-8">
           <div className="flex items-end">
             {SCALE_ITEMS.map((item) => (
               <div key={item.label} className="flex min-w-0 flex-1 justify-center overflow-visible">
@@ -45,7 +45,7 @@ export default async function Home({
                     alt={item.label}
                     width={400}
                     height={200}
-                    className="h-auto w-[96px] max-w-none shrink-0 mix-blend-multiply sm:w-[160px]"
+                    className="h-auto w-[80px] max-w-none shrink-0 mix-blend-multiply sm:w-[160px]"
                     priority
                   />
                 ) : (
@@ -89,7 +89,7 @@ export default async function Home({
         </div>
       </div>
 
-      <div className="mt-10 w-full max-w-xl">
+      <div className="mt-8 w-full max-w-xl">
         <InputArea previousId={previous} />
       </div>
       <p className="mt-6 text-center text-sm text-gray-light">

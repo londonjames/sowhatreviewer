@@ -222,7 +222,7 @@ export default function InputArea({ previousId }: InputAreaProps) {
   }
 
   return (
-    <div className="flex w-full flex-col gap-7">
+    <div className="flex w-full flex-col gap-6">
       <section className="flex flex-col gap-2">
       <StepHeading
         n={1}
@@ -285,7 +285,7 @@ export default function InputArea({ previousId }: InputAreaProps) {
           value={audience}
           onChange={(e) => setAudience(e.target.value)}
           rows={3}
-          placeholder="e.g. My board. They asked for efficiency last quarter and are sceptical of new headcount. I want them to approve two hires."
+          placeholder="e.g. My board. They are sceptical of new headcount. I want them to approve two hires."
           className={FIELD_CLASS}
         />
       </section>
