@@ -17,18 +17,18 @@ const right = `calc(var(--h) * ${CLEAR / 2} + ${NUDGE}px)`;
 
 /** Published sample reviews of made-up documents (ids from publish.mjs), linked under the form. */
 const SAMPLES = [
-  { label: "Muddled", score: 43, id: "mwlins0680cv", color: "#b54708" },
-  { label: "On Point", score: 82, id: "mwlins7vdfmh", color: "#067647" },
-  { label: "Crystal Clear", score: 92, id: "mwlinsdtvggx", color: "#067647" },
+  { label: "Muddled", score: 43, id: "mwlins0680cv" },
+  { label: "On Point", score: 82, id: "mwlins7vdfmh" },
+  { label: "Crystal Clear", score: 92, id: "mwlinsdtvggx" },
 ];
 
 const TICKS: { text: string; color?: string }[] = [
   { text: "0" },
-  { text: "Lost", color: "#b42318" },
-  { text: "Muddled", color: "#b54708" },
+  { text: "Lost" },
+  { text: "Muddled" },
   { text: "50" },
-  { text: "Getting There", color: "#175cd3" },
-  { text: "On Point", color: "#067647" },
+  { text: "Getting There" },
+  { text: "On Point" },
   { text: "100" },
 ];
 
@@ -96,27 +96,21 @@ export default async function Home({
   const { previous } = await searchParams;
 
   return (
-    <div className="themed min-h-screen bg-[var(--ui-page)] px-6 pt-16 pb-6 sm:pt-6 text-[var(--ui-ink)] transition-colors">
+    <div className="themed min-h-screen bg-[var(--ui-page)] px-6 pt-16 pb-2 lg:pt-12 text-[var(--ui-ink)] transition-colors">
       <ThemeToggle />
-      <a
-        href="/instructions"
-        className="home-header absolute left-5 top-6 text-sm font-medium text-[var(--ui-ink-2)] transition hover:text-[var(--ui-accent-text)] sm:fixed sm:top-7"
-      >
-        How it&apos;s scored
-      </a>
       <div className="mx-auto w-full max-w-[680px]">
         <div className="home-header">
         <h1 className="text-balance text-center text-[30px] font-semibold leading-[1.12] tracking-[-0.03em] sm:text-[40px] lg:whitespace-nowrap">
           Does your doc have a clear{" "}
           <span className="whitespace-nowrap text-[var(--ui-accent)]">So What?</span>
         </h1>
-        <p className="mt-2 text-center text-[17px] text-[var(--ui-ink-2)] sm:text-[20px]">
+        <p className="mt-4 text-center text-[17px] text-[var(--ui-ink-2)] sm:text-[20px]">
           Is its <strong className="font-semibold text-[var(--ui-ink)]">intent</strong> clear? Does it{" "}
           <strong className="font-semibold text-[var(--ui-ink)]">deliver</strong>? Is there a strong{" "}
           <strong className="font-semibold text-[var(--ui-ink)]">narrative</strong>?
         </p>
 
-        <div className="mt-5">
+        <div className="mt-3">
           <Scale />
         </div>
         </div>
@@ -125,14 +119,13 @@ export default async function Home({
           <InputArea previousId={previous} />
         </div>
         {SAMPLES.every((x) => x.id) && (
-          <p className="home-header mt-4 text-center text-[15px] text-[var(--ui-muted)]">
+          <p className="home-header mt-3 text-center text-[15px] text-[var(--ui-muted)]">
             Want a sample?{" "}
             {SAMPLES.map((x, i) => (
               <span key={x.id}>
                 <a
                   href={`/r/${x.id}`}
-                  className="font-medium underline decoration-[var(--ui-line)] underline-offset-4 hover:decoration-current"
-                  style={{ color: x.color }}
+                  className="font-medium text-[var(--ui-ink-2)] underline decoration-[var(--ui-line)] underline-offset-4 hover:text-[var(--ui-ink)]"
                 >
                   {x.label} ({x.score})
                 </a>

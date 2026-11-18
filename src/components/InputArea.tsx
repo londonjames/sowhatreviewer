@@ -276,7 +276,7 @@ export default function InputArea({ previousId }: InputAreaProps) {
           value={audience}
           onChange={(e) => setAudience(e.target.value)}
           rows={3}
-          placeholder="e.g. My board. They are sceptical of new headcount. I want them to approve two hires."
+          placeholder="e.g. My board. Wary of new headcount. Goal: approve two hires."
           className={FIELD_CLASS}
         />
       </section>
