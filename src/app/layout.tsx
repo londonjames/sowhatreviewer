@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
-import { Inter, EB_Garamond } from "next/font/google";
+import { Inter, EB_Garamond, Geist } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
 });
 
@@ -32,8 +37,17 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${garamond.variable} antialiased`}
+      className={`${inter.variable} ${geist.variable} ${garamond.variable} antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        {/* Apply the saved theme before first paint so dark mode does not flash white. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem("sowhat_theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="min-h-screen">{children}</body>
     </html>
   );

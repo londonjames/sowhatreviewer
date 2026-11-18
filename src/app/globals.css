@@ -13,6 +13,35 @@
   --surface: #f8f8f8;
 }
 
+/* Home page theme. Light by default; the toggle sets data-theme="dark" on <html>.
+   Scoped to --home-* so the review pages, which hard-code their colours, stay light. */
+:root {
+  --home-page: #ffffff;
+  --home-ink: #0a0a0a;
+  --home-ink-2: #525252;
+  --home-muted: #a3a3a3;
+  --home-field: #ffffff;
+  --home-field-border: #e5e5e5;
+  --home-drop-border: #d4d4d4;
+  --home-drop-text: #737373;
+  --home-panel: #fafafa;
+  --home-panel-border: #ececec;
+  --home-accent: #2563eb;
+}
+
+:root[data-theme="dark"] {
+  --home-page: #1c1c1c;
+  --home-ink: #f5f5f5;
+  --home-ink-2: #9ca3af;
+  --home-muted: #6b7280;
+  --home-field: #242424;
+  --home-field-border: #3a3a3a;
+  --home-drop-border: #3a3a3a;
+  --home-drop-text: #9ca3af;
+  --home-panel: #fbfaf7;
+  --home-panel-border: #fbfaf7;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -28,5 +57,10 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-geist), system-ui, sans-serif;
 }
+
+/* Theme toggle icon: moon in light mode, sun in dark mode. */
+.theme-icon-sun { display: none; }
+:root[data-theme="dark"] .theme-icon-sun { display: block; }
+:root[data-theme="dark"] .theme-icon-moon { display: none; }

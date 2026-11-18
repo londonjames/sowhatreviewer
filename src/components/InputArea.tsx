@@ -12,18 +12,16 @@ const ACCEPTED = ".pdf,.docx,.doc,.pptx,.ppt,.txt,.md";
 const ACCEPTED_EXTENSIONS = ["pdf", "docx", "doc", "pptx", "ppt", "txt", "md"];
 
 const FIELD_CLASS =
-  "w-full resize-y rounded-xl border border-gray-border bg-white px-4 py-3 text-base leading-relaxed text-foreground shadow-[0_1px_2px_rgba(20,50,77,0.06)] placeholder:text-[#9a958c] outline-none transition focus:border-[#1a5a8a] focus:ring-4 focus:ring-[#1a5a8a]/10";
+  "w-full resize-none rounded-xl border border-[var(--home-field-border)] bg-[var(--home-field)] px-4 py-3 text-base leading-relaxed text-[var(--home-ink)] placeholder:text-[var(--home-muted)] outline-none transition focus:border-[var(--home-accent)] focus:ring-4 focus:ring-[var(--home-accent)]/15";
 
 
 function StepHeading({ n, title, note }: { n: number; title: string; note?: string }) {
   return (
-    <div className="mb-2.5 text-left">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#1a5a8a]">Step {n}</p>
-      <h2 className="mt-1 text-xl font-semibold tracking-[-0.01em] text-foreground">
-        {title}
-        {note && <span className="ml-2 text-base font-normal text-gray-light">{note}</span>}
-      </h2>
-    </div>
+    <h2 className="mb-2.5 text-left text-[19px] font-semibold tracking-[-0.01em] text-[var(--home-ink)]">
+      <span className="mr-2.5 text-[var(--home-accent)]">{String(n).padStart(2, "0")}</span>
+      {title}
+      {note && <span className="ml-2 text-[15px] font-normal text-[var(--home-muted)]">{note}</span>}
+    </h2>
   );
 }
 
@@ -198,14 +196,14 @@ export default function InputArea({ previousId }: InputAreaProps) {
       <div className="flex w-full flex-col items-center gap-8 py-8">
         {!hasContent && (
           <>
-            <p className="text-xl text-foreground">
+            <p className="text-xl text-[var(--home-ink)]">
               Reading your document...
             </p>
             <div className="flex items-center gap-2">
               {[0, 1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="h-1.5 w-8 animate-pulse rounded-full bg-gray-border"
+                  className="h-1.5 w-8 animate-pulse rounded-full bg-[var(--home-field-border)]"
                   style={{ animationDelay: `${i * 200}ms` }}
                 />
               ))}
@@ -213,7 +211,8 @@ export default function InputArea({ previousId }: InputAreaProps) {
           </>
         )}
         {hasContent && (
-          <div className="w-full text-left">
+          // The review has fixed light colours, so it sits on a white card in dark mode too.
+          <div className="w-full rounded-2xl bg-white p-4 text-left text-foreground sm:p-6">
             <ReviewBody result={partial} streaming />
           </div>
         )}
@@ -222,16 +221,16 @@ export default function InputArea({ previousId }: InputAreaProps) {
   }
 
   return (
-    <div className="flex w-full flex-col gap-6">
-      <section className="flex flex-col gap-2">
+    <div className="flex w-full flex-col gap-5">
+      <section className="flex flex-col gap-2.5">
       <StepHeading
         n={1}
-        title={previousId ? "Paste your revised document" : "Paste your document"}
+        title={previousId ? "Paste or attach your revised doc" : "Paste or attach your doc"}
       />
       <textarea
         value={text}
         onChange={handleTextChange}
-        placeholder="Paste your document here..."
+        placeholder="Paste your content here"
         rows={3}
         autoFocus
         className={FIELD_CLASS}
@@ -245,22 +244,20 @@ export default function InputArea({ previousId }: InputAreaProps) {
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`flex cursor-pointer items-center justify-center gap-3 rounded-xl border border-dashed py-2.5 transition-colors ${
-          dragOver
-            ? "border-foreground bg-surface"
-            : file
-              ? "border-foreground bg-white"
-              : "border-[#cfc9bd] bg-white/60 hover:border-[#1a5a8a] hover:bg-white"
+        className={`flex cursor-pointer items-center justify-center gap-3 rounded-xl border border-dashed py-3 transition-colors ${
+          dragOver || file
+            ? "border-[var(--home-accent)]"
+            : "border-[var(--home-drop-border)] hover:border-[var(--home-accent)]"
         }`}
       >
         {file ? (
-          <p className="text-sm text-foreground">
+          <p className="text-sm text-[var(--home-ink)]">
             <span className="font-medium">{file.name}</span>
-            <span className="ml-2 text-gray-light">(click to replace)</span>
+            <span className="ml-2 text-[var(--home-muted)]">(click to replace)</span>
           </p>
         ) : (
-          <p className="text-sm text-gray">
-            Or drop a file here: PDF, Word or PowerPoint
+          <p className="text-sm text-[var(--home-drop-text)]">
+            or drop a PDF, Word or PowerPoint file
           </p>
         )}
         <input
@@ -290,12 +287,11 @@ export default function InputArea({ previousId }: InputAreaProps) {
         />
       </section>
 
-      {error && <p className="text-center text-sm text-red-700">{error}</p>}
+      {error && <p className="text-center text-sm text-[#dc2626]">{error}</p>}
 
       <button
         onClick={handleSubmit}
-        disabled={!text.trim() && !file}
-        className="rounded-xl bg-[#14324d] px-10 py-3.5 text-base font-semibold text-white shadow-sm transition hover:bg-[#1a5a8a] disabled:cursor-not-allowed disabled:bg-[#14324d]/30 disabled:shadow-none"
+        className="rounded-[14px] bg-[var(--home-accent)] px-10 py-4 text-[17px] font-bold text-white transition hover:bg-[#1d4ed8] active:translate-y-px"
       >
         {previousId ? "Re-review my document" : "Review my document"}
       </button>

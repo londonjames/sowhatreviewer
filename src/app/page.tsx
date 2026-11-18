@@ -1,19 +1,85 @@
-import Image from "next/image";
 import InputArea from "@/components/InputArea";
+import ThemeToggle from "@/components/ThemeToggle";
 
 /**
- * The seven ratings, low to high. Three carry a stamp; the other four show
- * their name. Only the two ends and the middle carry a number.
+ * The rating strip. Stamps are trimmed to their ink and sized by height, so all
+ * three look the same size. The end ticks sit under the centres of the end
+ * stamps, so NOPE and CRYSTAL CLEAR sit the same distance from the panel edges.
+ * Ratios are width / height of the trimmed images in public/stamps/trim.
  */
-const SCALE_ITEMS = [
-  { label: "Nope", color: "#8b3a3a", stamp: "/stamps/nope.png", n: "0" },
-  { label: "Lost", color: "#8b3a3a" },
-  { label: "Muddled", color: "#8b6914" },
-  { label: "Hazy", color: "#1a5a8a", stamp: "/stamps/hazy.png", n: "50" },
-  { label: "Getting There", color: "#1a5a8a" },
-  { label: "On Point", color: "#1a6b35" },
-  { label: "Crystal Clear", color: "#1a6b35", stamp: "/stamps/crystal-clear.png", n: "100" },
+const NOPE = 2.4556;
+const HAZY = 2.3667;
+const CLEAR = 3.0248;
+const NUDGE = 5; // px: CRYSTAL CLEAR's ink runs to its image edge; NOPE's does not.
+
+const left = `calc(var(--h) * ${NOPE / 2})`;
+const right = `calc(var(--h) * ${CLEAR / 2} + ${NUDGE}px)`;
+
+const TICKS: { text: string; color?: string }[] = [
+  { text: "0" },
+  { text: "Lost", color: "#b42318" },
+  { text: "Muddled", color: "#b54708" },
+  { text: "50" },
+  { text: "Getting There", color: "#175cd3" },
+  { text: "On Point", color: "#067647" },
+  { text: "100" },
 ];
+
+function Stamp({ src, alt, ratio, style }: { src: string; alt: string; ratio: number; style: React.CSSProperties }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      className="absolute bottom-0 mix-blend-multiply"
+      style={{ height: "var(--h)", width: `calc(var(--h) * ${ratio})`, ...style }}
+    />
+  );
+}
+
+function Scale() {
+  return (
+    <div className="rounded-[20px] border border-[var(--home-panel-border)] bg-[var(--home-panel)] px-4 pt-5 pb-3 [--h:40px] sm:px-7 sm:pt-6 sm:[--h:60px]">
+      <div className="relative" style={{ height: "var(--h)" }}>
+        <Stamp src="/stamps/trim/nope.png" alt="Nope" ratio={NOPE} style={{ left: 0 }} />
+        <Stamp
+          src="/stamps/trim/hazy.png"
+          alt="Hazy"
+          ratio={HAZY}
+          style={{ left: `calc(${left} + (100% - ${left} - ${right}) / 2)`, transform: "translateX(-50%)" }}
+        />
+        <Stamp src="/stamps/trim/crystal-clear.png" alt="Crystal Clear" ratio={CLEAR} style={{ right: NUDGE }} />
+      </div>
+
+      <div className="relative mt-3 h-10" style={{ marginLeft: left, marginRight: right }}>
+        <div
+          className="absolute top-[7px] h-px bg-[#d4d4d4]"
+          style={{ left: `calc(-1 * ${left})`, right: `calc(-1 * ${right})` }}
+        />
+        {TICKS.map((t, i) => {
+          const at = `${(i / 6) * 100}%`;
+          const anchor = !t.color;
+          return (
+            <div key={t.text}>
+              <i
+                className={`absolute w-px -translate-x-1/2 ${anchor ? "top-0 h-3.5 bg-[#111]" : "top-[3px] h-2 bg-[#d4d4d4]"}`}
+                style={{ left: at }}
+              />
+              <span
+                className={`absolute top-6 -translate-x-1/2 whitespace-nowrap text-[12.5px] tracking-[-0.01em] tabular-nums ${
+                  anchor ? "font-semibold text-[#111]" : "hidden font-medium sm:inline"
+                }`}
+                style={{ left: at, color: t.color }}
+              >
+                {t.text}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default async function Home({
   searchParams,
@@ -23,78 +89,27 @@ export default async function Home({
   const { previous } = await searchParams;
 
   return (
-    <div className="flex min-h-screen flex-col items-center px-6 pt-8 pb-6 md:pt-12">
-      <h1 className="w-full max-w-4xl text-center text-[2rem] font-semibold leading-tight tracking-[-0.02em] text-[#14324d] text-balance md:text-[2.5rem] lg:whitespace-nowrap">
-        Does your document convey a clear So&nbsp;What?
-      </h1>
-      <div className="w-full max-w-2xl text-center">
-        <p className="mt-3 text-lg text-gray md:text-xl">
-          Is its <span className="font-semibold text-foreground">intent</span> clear? Does it{" "}
-          <span className="font-semibold text-foreground">deliver</span>? Is there a strong{" "}
-          <span className="font-semibold text-foreground">narrative</span>?
+    <div className="min-h-screen bg-[var(--home-page)] px-6 pt-8 pb-8 text-[var(--home-ink)] transition-colors">
+      <ThemeToggle />
+      <div className="mx-auto w-full max-w-[680px]">
+        <h1 className="text-balance text-center text-[30px] font-semibold leading-[1.12] tracking-[-0.03em] sm:text-[40px] lg:whitespace-nowrap">
+          Does your doc have a clear{" "}
+          <span className="whitespace-nowrap text-[var(--home-accent)]">So What?</span>
+        </h1>
+        <p className="mt-3 text-center text-[17px] text-[var(--home-ink-2)] sm:text-[20px]">
+          Is its <strong className="font-semibold text-[var(--home-ink)]">intent</strong> clear? Does it{" "}
+          <strong className="font-semibold text-[var(--home-ink)]">deliver</strong>? Is there a strong{" "}
+          <strong className="font-semibold text-[var(--home-ink)]">narrative</strong>?
         </p>
 
-        {/* Rating scale */}
-        <div className="mt-6 w-full md:mt-8">
-          <div className="flex items-end">
-            {SCALE_ITEMS.map((item) => (
-              <div key={item.label} className="flex min-w-0 flex-1 justify-center overflow-visible">
-                {item.stamp ? (
-                  <Image
-                    src={item.stamp}
-                    alt={item.label}
-                    width={400}
-                    height={200}
-                    className="h-auto w-[80px] max-w-none shrink-0 mix-blend-multiply sm:w-[160px]"
-                    priority
-                  />
-                ) : (
-                  <div className="h-[40px] sm:h-[64px]" />
-                )}
-              </div>
-            ))}
-          </div>
+        <div className="mt-6">
+          <Scale />
+        </div>
 
-          {/* Line and seven tick marks */}
-          <div className="relative mt-2 h-4">
-            <div className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-[#bdb7ab]" />
-            <div className="relative flex h-full">
-              {SCALE_ITEMS.map((item) => (
-                <div key={item.label} className="flex min-w-0 flex-1 items-start justify-center">
-                  <div
-                    className={`w-px ${item.stamp ? "h-4 bg-[#14324d]" : "mt-[3px] h-2.5 bg-[#bdb7ab]"}`}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Numbers at 0, 50 and 100; names under the four unstamped ticks */}
-          <div className="mt-2 flex">
-            {SCALE_ITEMS.map((item) => (
-              <div key={item.label} className="flex min-w-0 flex-1 justify-center overflow-visible">
-                {item.stamp ? (
-                  <span className="text-sm font-semibold tabular-nums text-[#14324d]">{item.n}</span>
-                ) : (
-                  <span
-                    className="hidden whitespace-nowrap text-sm font-medium sm:inline"
-                    style={{ color: item.color }}
-                  >
-                    {item.label}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
+        <div className="mt-6">
+          <InputArea previousId={previous} />
         </div>
       </div>
-
-      <div className="mt-8 w-full max-w-xl">
-        <InputArea previousId={previous} />
-      </div>
-      <p className="mt-6 text-center text-sm text-gray-light">
-        Reviewed against James Raybould&apos;s bar for executive documents.
-      </p>
     </div>
   );
 }
