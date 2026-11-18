@@ -18,7 +18,7 @@ const FIELD_CLASS =
 
 function StepHeading({ n, title, note }: { n: number; title: string; note?: string }) {
   return (
-    <h2 className="mb-2.5 text-left text-[19px] font-semibold tracking-[-0.01em] text-[var(--ui-ink)]">
+    <h2 className="mb-2 text-left text-[19px] font-semibold tracking-[-0.01em] text-[var(--ui-ink)]">
       <span className="mr-2.5 text-[var(--ui-accent)]">{String(n).padStart(2, "0")}</span>
       {title}
       {note && <span className="ml-2 text-[15px] font-normal text-[var(--ui-muted)]">{note}</span>}
@@ -210,8 +210,8 @@ export default function InputArea({ previousId }: InputAreaProps) {
   }
 
   return (
-    <div className="flex w-full flex-col gap-5">
-      <section className="flex flex-col gap-2.5">
+    <div className="flex w-full flex-col gap-4">
+      <section className="flex flex-col gap-2">
       <StepHeading
         n={1}
         title={previousId ? "Paste your revised doc or a Google link, or attach a file" : "Paste your doc or a Google link, or attach a file"}

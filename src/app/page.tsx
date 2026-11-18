@@ -96,7 +96,7 @@ export default async function Home({
   const { previous } = await searchParams;
 
   return (
-    <div className="themed min-h-screen bg-[var(--ui-page)] px-6 pt-16 pb-8 sm:pt-8 text-[var(--ui-ink)] transition-colors">
+    <div className="themed min-h-screen bg-[var(--ui-page)] px-6 pt-16 pb-6 sm:pt-6 text-[var(--ui-ink)] transition-colors">
       <ThemeToggle />
       <a
         href="/instructions"
@@ -110,22 +110,22 @@ export default async function Home({
           Does your doc have a clear{" "}
           <span className="whitespace-nowrap text-[var(--ui-accent)]">So What?</span>
         </h1>
-        <p className="mt-3 text-center text-[17px] text-[var(--ui-ink-2)] sm:text-[20px]">
+        <p className="mt-2 text-center text-[17px] text-[var(--ui-ink-2)] sm:text-[20px]">
           Is its <strong className="font-semibold text-[var(--ui-ink)]">intent</strong> clear? Does it{" "}
           <strong className="font-semibold text-[var(--ui-ink)]">deliver</strong>? Is there a strong{" "}
           <strong className="font-semibold text-[var(--ui-ink)]">narrative</strong>?
         </p>
 
-        <div className="mt-6">
+        <div className="mt-5">
           <Scale />
         </div>
         </div>
 
-        <div className="home-form mx-auto mt-6 max-w-[560px]">
+        <div className="home-form mx-auto mt-4 max-w-[560px]">
           <InputArea previousId={previous} />
         </div>
         {SAMPLES.every((x) => x.id) && (
-          <p className="home-header mt-5 text-center text-[15px] text-[var(--ui-muted)]">
+          <p className="home-header mt-4 text-center text-[15px] text-[var(--ui-muted)]">
             Want a sample?{" "}
             {SAMPLES.map((x, i) => (
               <span key={x.id}>
