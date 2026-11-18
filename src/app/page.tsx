@@ -24,12 +24,12 @@ export default async function Home({
 
   return (
     <div className="flex min-h-screen flex-col items-center px-6 pt-12 pb-8">
+      <h1 className="w-full max-w-4xl text-center text-[2rem] font-semibold leading-tight tracking-[-0.02em] text-[#14324d] md:text-[2.5rem] lg:whitespace-nowrap">
+        Does your document convey a clear So What?
+      </h1>
       <div className="w-full max-w-2xl text-center">
-        <h1 className="text-[2.1rem] font-semibold leading-tight tracking-[-0.02em] text-[#14324d] md:text-[2.6rem]">
-          Does your document land a clear So What?
-        </h1>
         <p className="mt-3 text-lg text-gray md:text-xl">
-          Is the <span className="font-semibold text-foreground">intent</span> clear? Does it{" "}
+          Is its <span className="font-semibold text-foreground">intent</span> clear? Does it{" "}
           <span className="font-semibold text-foreground">deliver</span>? Is there a strong{" "}
           <span className="font-semibold text-foreground">narrative</span>?
         </p>
@@ -77,7 +77,7 @@ export default async function Home({
                   <span className="text-sm font-semibold tabular-nums text-[#14324d]">{item.n}</span>
                 ) : (
                   <span
-                    className="whitespace-nowrap text-xs font-medium sm:text-sm"
+                    className="hidden whitespace-nowrap text-sm font-medium sm:inline"
                     style={{ color: item.color }}
                   >
                     {item.label}

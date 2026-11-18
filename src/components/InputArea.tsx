@@ -284,7 +284,7 @@ export default function InputArea({ previousId }: InputAreaProps) {
           aria-label="Your audience and goal"
           value={audience}
           onChange={(e) => setAudience(e.target.value)}
-          rows={2}
+          rows={3}
           placeholder="e.g. My board. They asked for efficiency last quarter and are sceptical of new headcount. I want them to approve two hires."
           className={FIELD_CLASS}
         />
