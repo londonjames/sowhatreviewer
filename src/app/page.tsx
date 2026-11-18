@@ -114,7 +114,7 @@ export default async function Home({
         </div>
         </div>
 
-        <div className="home-form mt-6">
+        <div className="home-form mx-auto mt-6 max-w-[560px]">
           <InputArea previousId={previous} />
         </div>
       </div>

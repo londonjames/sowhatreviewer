@@ -24,8 +24,10 @@
   --ui-field-border: #e5e5e5;
   --ui-drop-border: #d4d4d4;
   --ui-drop-text: #737373;
-  --ui-panel: #fafafa;
-  --ui-panel-border: #ececec;
+  /* No box behind the stamps in light mode (as on Profiler); dark mode keeps a
+     paper panel so the dark ink stays readable. */
+  --ui-panel: transparent;
+  --ui-panel-border: transparent;
   --ui-accent: #2563eb;
   --ui-accent-text: #2563eb;
   --ui-card: #fafafa;
@@ -87,4 +89,4 @@ body {
 /* While a review streams on the home page, hide the title and scale so the
    page has the same layout as the finished review it navigates to. */
 :root[data-reviewing] .home-header { display: none; }
-:root[data-reviewing] .home-form { margin-top: 0; }
+:root[data-reviewing] .home-form { margin-top: 0; max-width: none; }
