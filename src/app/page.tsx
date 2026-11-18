@@ -91,6 +91,12 @@ export default async function Home({
   return (
     <div className="themed min-h-screen bg-[var(--ui-page)] px-6 pt-16 pb-8 sm:pt-8 text-[var(--ui-ink)] transition-colors">
       <ThemeToggle />
+      <a
+        href="/instructions"
+        className="home-header absolute left-5 top-6 text-sm font-medium text-[var(--ui-ink-2)] transition hover:text-[var(--ui-accent-text)] sm:fixed sm:top-7"
+      >
+        How it&apos;s scored
+      </a>
       <div className="mx-auto w-full max-w-[680px]">
         <div className="home-header">
         <h1 className="text-balance text-center text-[30px] font-semibold leading-[1.12] tracking-[-0.03em] sm:text-[40px] lg:whitespace-nowrap">
@@ -111,11 +117,6 @@ export default async function Home({
         <div className="home-form mt-6">
           <InputArea previousId={previous} />
         </div>
-        <p className="home-header mt-5 text-center text-sm text-[var(--ui-muted)]">
-          <a href="/instructions" className="underline decoration-[var(--ui-line)] underline-offset-4 hover:text-[var(--ui-accent-text)]">
-            How documents are scored
-          </a>
-        </p>
       </div>
     </div>
   );
