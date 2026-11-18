@@ -64,3 +64,8 @@ body {
 .theme-icon-sun { display: none; }
 :root[data-theme="dark"] .theme-icon-sun { display: block; }
 :root[data-theme="dark"] .theme-icon-moon { display: none; }
+
+/* Stamp height on the home rating strip: fits the three stamps on any phone
+   (their widths add up to about 7.85 heights, plus room between), 60px from 640px up. */
+.scale-h { --h: min(40px, calc((100vw - 80px) / 9)); }
+@media (min-width: 640px) { .scale-h { --h: 60px; } }

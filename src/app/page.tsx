@@ -39,7 +39,7 @@ function Stamp({ src, alt, ratio, style }: { src: string; alt: string; ratio: nu
 
 function Scale() {
   return (
-    <div className="rounded-[20px] border border-[var(--home-panel-border)] bg-[var(--home-panel)] px-4 pt-5 pb-3 [--h:40px] sm:px-7 sm:pt-6 sm:[--h:60px]">
+    <div className="rounded-[20px] border border-[var(--home-panel-border)] bg-[var(--home-panel)] px-4 pt-5 pb-3 scale-h sm:px-7 sm:pt-6">
       <div className="relative" style={{ height: "var(--h)" }}>
         <Stamp src="/stamps/trim/nope.png" alt="Nope" ratio={NOPE} style={{ left: 0 }} />
         <Stamp
