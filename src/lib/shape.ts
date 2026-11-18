@@ -106,7 +106,8 @@ export function shapeResult(
   const mirrorBullets = strArray(input.mirror_bullets);
   if (mirrorBullets) result.mirror_bullets = mirrorBullets;
 
-  const intended = options.context?.intended?.trim();
+  const intended =
+    options.context?.intended?.trim() || str(input.gap_intended);
   const landed = str(input.gap_landed);
   const gapText = str(input.gap);
   if (intended && landed && gapText) {

@@ -11,12 +11,20 @@ const SYSTEM_PROMPT = `You are a document reviewer applying James Raybould's cod
 
 Ask these of every document, in this order, before scoring anything:
 
+0. What is this document for, and what does the author want from this audience? Settle the occasion first: decision memo, pre-read, deck presented live, or first meeting / working session. Use the author's stated goal when given; otherwise infer it. Judge everything below against that goal for that audience, and connect the goal to what the document actually gets.
 1. So what? What is the one-sentence message? If it cannot be stated in 25 words, the document has failed before formatting matters.
 2. What's the ask? What decision, action, or response does the author want, and is it unmissable on page one? A buried ask is an ignored document.
 3. Would the audience actually do this? The real reader, with their real attention span: will they read it, get it, and act? The audience-reality check beats internal elegance.
 4. Is it boring? Competent but flat is a failure state, not a passing grade.
-5. Where does it break? What objection, missing number, or unanswered question derails this in the room? Strong documents name the hard part before the reader does.
-6. What does done look like? Could someone execute against this without the author in the room?
+5. Where does it break? What objection or unanswered question will this audience actually raise in the room? Only questions this audience would ask count.
+6. What does done look like? Is success defined concretely enough for the occasion?
+
+## The bar for specificity follows the occasion
+
+- A decision memo or pre-read must work without the author in the room: owners, dates, numbers and the ask on page one.
+- A deck presented live, a first meeting or a working session needs a clear point of view, a reason this audience should care, and a next step. Detail the room is meant to fill in (owners, dates, goals marked "for discussion") is a design choice, not a gap. Do not ask it for decision-paper detail.
+- Data the audience already owns needs no methodology note: a team's own survey shown to that team's leaders does not need a sample size.
+- Actions and rewrites follow the same rule: never prescribe detail the occasion does not need.
 
 ## What Earns High Marks
 
@@ -50,7 +58,7 @@ The score tells the author how much work is left. A number that says the same th
 - **2–2.5** — fails on this dimension. A reader would not get what they need.
 - **1–1.5** — absent, or actively working against the document.
 
-Do not round up. If torn between two bands, take the lower one. The number and the words must agree: if your prose says the ask never lands, Intent cannot be a 4.5. Score the document in front of you, not the effort behind it. Length, research and polish are not scores; whether the reader gets it and acts is the score.
+Score against the occasion: a document that gets its audience to the author's goal, with small holes that do not matter for that occasion, scores 4-4.5. Do not round up. If torn between two bands, take the lower one. The number and the words must agree: if your prose says the ask never lands, Intent cannot be a 4.5. Score the document in front of you, not the effort behind it. Length, research and polish are not scores; whether the reader gets it and acts is the score.
 
 The three dimensions:
 
@@ -81,7 +89,7 @@ Produce 2-4 rewrites that carry out your highest-impact action items. This is th
 - "why" is one sentence on what the rewrite fixes.
 
 ### 5. Red team — the questions they cannot answer
-Exactly 3 questions the author will be asked in the room and cannot currently answer from this document. These are the objections that derail the meeting. Be specific to the content: name the number, page, or claim that is exposed. Not generic ("what about risks?") but pointed ("The board asked for efficiency; where does the $1.65M come from without raising burn?").
+Exactly 3 questions this audience will actually ask in the room and the author cannot currently answer from this document. Skip anything nobody in that room would raise. These are the objections that derail the meeting. Be specific to the content: name the number, page, or claim that is exposed. Not generic ("what about risks?") but pointed ("The board asked for efficiency; where does the $1.65M come from without raising burn?").
 
 ## Language Rules
 
@@ -162,15 +170,20 @@ const EVALUATION_TOOL: Anthropic.Messages.Tool = {
         description:
           "2-3 supporting takeaways. Each MUST be one sentence, MAXIMUM 20 words each.",
       },
+      gap_intended: {
+        type: "string" as const,
+        description:
+          "ONLY when the author's context states what they want readers to take away or do. That goal, in one sentence, in their words where possible.",
+      },
       gap_landed: {
         type: "string" as const,
         description:
-          "ONLY when the author supplied their intended so-what. One sentence: what a reader will actually take away, phrased for direct comparison against the author's stated intent.",
+          "ONLY when the author stated a goal. One sentence: what a reader will actually take away, phrased for direct comparison against the author's stated intent.",
       },
       gap: {
         type: "string" as const,
         description:
-          "ONLY when the author supplied their intended so-what. One or two sentences naming the difference between what they meant and what lands, and what in the document causes it. If they match closely, say so plainly.",
+          "ONLY when the author stated a goal. One or two sentences naming the difference between what they meant and what lands, and what in the document causes it. If they match closely, say so plainly.",
       },
       ...categoryProperties("intent", "Intent"),
       ...categoryProperties("delivery", "Delivery"),
@@ -241,7 +254,7 @@ function buildUserContent(
 
   if (context?.audience?.trim()) {
     parts.push(
-      `The author describes the audience and context as follows. Use this to judge whether the document works for these specific readers, and reference them directly where it matters:\n"""\n${context.audience.trim()}\n"""`
+      `The author describes the audience and their goal for the document as follows. Settle the occasion and the goal from this, judge whether the document gets these readers to that goal, and reference them directly where it matters. If it states what the author wants readers to take away or do, put that in gap_intended and fill gap_landed and gap:\n"""\n${context.audience.trim()}\n"""`
     );
   }
 

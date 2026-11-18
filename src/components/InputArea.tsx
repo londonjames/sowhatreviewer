@@ -12,34 +12,18 @@ const ACCEPTED = ".pdf,.docx,.doc,.pptx,.ppt,.txt,.md";
 const ACCEPTED_EXTENSIONS = ["pdf", "docx", "doc", "pptx", "ppt", "txt", "md"];
 
 const FIELD_CLASS =
-  "w-full resize-y rounded-lg border border-gray-border bg-white px-5 py-3 text-base leading-relaxed text-foreground placeholder:text-gray-light outline-none transition-colors focus:border-foreground";
+  "w-full resize-y rounded-lg border border-gray-border bg-white px-5 py-3 text-lg leading-relaxed text-foreground placeholder:text-gray-light outline-none transition-colors focus:border-foreground";
 
-const LABEL_CLASS = "mb-1.5 block text-left text-sm text-gray";
 
 const SERIF = { fontFamily: "var(--font-garamond), Georgia, serif" };
 
-function StepHeading({
-  n,
-  title,
-  note,
-}: {
-  n: number;
-  title: string;
-  note?: string;
-}) {
+function StepHeading({ n, title, note }: { n: number; title: string; note?: string }) {
   return (
-    <div className="mb-4 flex items-center gap-4 text-left">
-      <span
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1a5a8a] text-2xl font-semibold italic text-white"
-        style={SERIF}
-      >
-        {n}
-      </span>
-      <h2 className="text-2xl font-medium text-foreground md:text-[1.7rem]" style={SERIF}>
-        {title}
-        {note && <span className="ml-2 text-lg italic text-gray-light">{note}</span>}
-      </h2>
-    </div>
+    <h2 className="mb-3 text-left text-2xl font-medium text-foreground md:text-[1.6rem]" style={SERIF}>
+      <span className="mr-2 italic text-[#1a5a8a]">{n}.</span>
+      {title}
+      {note && <span className="ml-2 text-lg italic text-gray-light">{note}</span>}
+    </h2>
   );
 }
 
@@ -51,7 +35,6 @@ interface InputAreaProps {
 export default function InputArea({ previousId }: InputAreaProps) {
   const [text, setText] = useState("");
   const [audience, setAudience] = useState("");
-  const [intended, setIntended] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -97,7 +80,6 @@ export default function InputArea({ previousId }: InputAreaProps) {
       const formData = new FormData();
       formData.append("file", file);
       if (audience.trim()) formData.append("audience", audience.trim());
-      if (intended.trim()) formData.append("intended", intended.trim());
       if (previousId) formData.append("previousId", previousId);
       return { method: "POST", body: formData };
     }
@@ -107,7 +89,6 @@ export default function InputArea({ previousId }: InputAreaProps) {
       body: JSON.stringify({
         text: text.trim(),
         audience: audience.trim() || undefined,
-        intended: intended.trim() || undefined,
         previousId,
       }),
     };
@@ -126,7 +107,6 @@ export default function InputArea({ previousId }: InputAreaProps) {
     const shapeOptions = {
       context: {
         audience: audience.trim() || undefined,
-        intended: intended.trim() || undefined,
       },
     };
 
@@ -242,8 +222,8 @@ export default function InputArea({ previousId }: InputAreaProps) {
   }
 
   return (
-    <div className="flex w-full flex-col gap-10">
-      <section className="flex flex-col gap-3">
+    <div className="flex w-full flex-col gap-7">
+      <section className="flex flex-col gap-2">
       <StepHeading
         n={1}
         title={previousId ? "Paste your revised document" : "Paste your document"}
@@ -252,7 +232,7 @@ export default function InputArea({ previousId }: InputAreaProps) {
         value={text}
         onChange={handleTextChange}
         placeholder="Paste your document here..."
-        rows={4}
+        rows={3}
         autoFocus
         className={FIELD_CLASS}
       />
@@ -265,7 +245,7 @@ export default function InputArea({ previousId }: InputAreaProps) {
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`flex cursor-pointer items-center justify-center gap-3 rounded-lg border py-4 transition-colors ${
+        className={`flex cursor-pointer items-center justify-center gap-3 rounded-lg border py-2.5 transition-colors ${
           dragOver
             ? "border-foreground bg-surface"
             : file
@@ -297,35 +277,17 @@ export default function InputArea({ previousId }: InputAreaProps) {
 
       </section>
 
-      <section className="flex flex-col gap-4">
+      <section className="flex flex-col">
         <StepHeading n={2} title="Describe your audience and goal" note="optional" />
-        <div>
-          <label htmlFor="audience" className={LABEL_CLASS}>
-            Who will read it, and what do they care about?
-          </label>
-          <textarea
-            id="audience"
-            value={audience}
-            onChange={(e) => setAudience(e.target.value)}
-            rows={2}
-            placeholder="e.g. My board. They asked for efficiency last quarter and are sceptical of new headcount."
-            className={FIELD_CLASS}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="intended" className={LABEL_CLASS}>
-            In one sentence, what should they take away?
-          </label>
-          <input
-            id="intended"
-            type="text"
-            value={intended}
-            onChange={(e) => setIntended(e.target.value)}
-            placeholder="We'll show you the gap between that and what actually lands."
-            className={FIELD_CLASS}
-          />
-        </div>
+        <textarea
+          id="audience"
+          aria-label="Your audience and goal"
+          value={audience}
+          onChange={(e) => setAudience(e.target.value)}
+          rows={2}
+          placeholder="e.g. My board. They asked for efficiency last quarter and are sceptical of new headcount. I want them to approve two hires."
+          className={FIELD_CLASS}
+        />
       </section>
 
       {error && <p className="text-center text-sm text-red-700">{error}</p>}

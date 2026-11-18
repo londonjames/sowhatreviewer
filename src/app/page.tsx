@@ -1,15 +1,20 @@
 import Image from "next/image";
 import InputArea from "@/components/InputArea";
 
-const SCALE_ITEMS = [
-  { n: 1, label: "Nope", color: "#8b3a3a", stamp: "/stamps/nope.png" },
-  { n: 2, label: "Lost", color: "#8b3a3a" },
-  { n: 3, label: "Muddled", color: "#8b6914" },
-  { n: 4, label: "Hazy", color: "#1a5a8a", stamp: "/stamps/hazy.png" },
-  { n: 5, label: "Getting There", color: "#1a5a8a" },
-  { n: 6, label: "On Point", color: "#1a6b35" },
-  { n: 7, label: "Crystal Clear", color: "#1a6b35", stamp: "/stamps/crystal-clear.png" },
+const SERIF = { fontFamily: "var(--font-garamond), Georgia, serif" };
+
+/**
+ * The 0-100 scale, with three stamps sitting over the middle of their bands
+ * (Nope 0-19, Hazy 60-69, Crystal Clear 90-100). The other four ratings are
+ * shown on the result page, not here.
+ */
+const STAMPS = [
+  { at: 10, label: "Nope", src: "/stamps/nope.png" },
+  { at: 65, label: "Hazy", src: "/stamps/hazy.png" },
+  { at: 95, label: "Crystal Clear", src: "/stamps/crystal-clear.png" },
 ];
+
+const TICKS = [0, 50, 100];
 
 export default async function Home({
   searchParams,
@@ -19,91 +24,63 @@ export default async function Home({
   const { previous } = await searchParams;
 
   return (
-    <div className="flex min-h-screen flex-col items-center px-6 pt-16 pb-16">
+    <div className="flex min-h-screen flex-col items-center px-6 pt-10 pb-8">
       <div className="w-full max-w-2xl text-center">
-        {/* Headline */}
         <h1
           className="text-3xl font-medium italic tracking-tight md:text-4xl"
-          style={{ fontFamily: "var(--font-garamond), Georgia, serif", color: "#1a5a8a" }}
+          style={{ ...SERIF, color: "#1a5a8a" }}
         >
           Does Your Document Convey A Clear So What?
         </h1>
-        <p className="mt-4 text-xl text-gray md:text-2xl">
+        <p className="mt-3 text-xl text-gray md:text-2xl">
           Is its <span className="font-bold">intent</span> clear? Does it{" "}
-          <span className="font-bold">deliver</span>? Is there a{" "}
-          strong <span className="font-bold">narrative</span>?
+          <span className="font-bold">deliver</span>? Is there a strong{" "}
+          <span className="font-bold">narrative</span>?
         </p>
 
-        {/* Stamp scale */}
-        <div className="mt-8 w-full">
-          {/* Stamps row */}
-          <div className="flex items-end">
-            {SCALE_ITEMS.map((item) => (
-              <div key={item.n} className="flex min-w-0 flex-1 justify-center overflow-visible">
-                {item.stamp ? (
-                  <Image
-                    src={item.stamp}
-                    alt={item.label}
-                    width={200}
-                    height={100}
-                    className="h-auto w-[170px] max-w-none shrink-0"
-                  />
-                ) : (
-                  <div className="h-[70px]" />
-                )}
-              </div>
+        {/* 0-100 scale */}
+        <div className="relative mx-auto mt-6 w-full max-w-xl px-8">
+          <div className="relative h-[64px]">
+            {STAMPS.map((s) => (
+              <Image
+                key={s.label}
+                src={s.src}
+                alt={s.label}
+                width={200}
+                height={100}
+                className="absolute bottom-0 h-auto w-[128px] max-w-none -translate-x-1/2"
+                style={{ left: `${s.at}%` }}
+              />
             ))}
           </div>
-
-          {/* Line + 7 ticks */}
-          <div className="relative mt-1" style={{ height: 16 }}>
-            <div className="absolute left-0 right-0 top-1/2 h-px -translate-y-1/2 bg-black" />
-            <div className="relative flex h-full">
-              {SCALE_ITEMS.map((item) => {
-                const isAnchor = !!item.stamp;
-                return (
-                  <div key={item.n} className="flex min-w-0 flex-1 items-start justify-center">
-                    <div
-                      className={`bg-black ${isAnchor ? "h-4 w-px" : "h-2.5 w-px"}`}
-                      style={{ marginTop: isAnchor ? 0 : 3 }}
-                    />
-                  </div>
-                );
-              })}
-            </div>
+          <div className="relative mt-2 h-px bg-black">
+            {TICKS.map((t) => (
+              <div
+                key={t}
+                className="absolute top-0 h-3 w-px -translate-y-1/2 bg-black"
+                style={{ left: `${t}%` }}
+              />
+            ))}
           </div>
-
-          {/* Labels — only non-stamp positions (stamps already show their name) */}
-          <div className="mt-1 flex">
-            {SCALE_ITEMS.map((item) => {
-              const isAnchor = !!item.stamp;
-              return (
-                <div key={item.n} className="flex min-w-0 flex-1 flex-col items-center overflow-visible">
-                  {isAnchor ? (
-                    <span className="text-sm font-medium text-black">{item.n}</span>
-                  ) : (
-                    <>
-                      <span className="text-sm text-gray-light">{item.n}</span>
-                      <span
-                        className="mt-0.5 whitespace-nowrap text-base font-semibold italic"
-                        style={{ fontFamily: "var(--font-garamond), Georgia, serif", color: item.color }}
-                      >
-                        {item.label}
-                      </span>
-                    </>
-                  )}
-                </div>
-              );
-            })}
+          <div className="relative mt-2 h-6">
+            {TICKS.map((t) => (
+              <span
+                key={t}
+                className="absolute -translate-x-1/2 text-base font-medium text-foreground"
+                style={{ left: `${t}%` }}
+              >
+                {t}
+              </span>
+            ))}
           </div>
         </div>
-
       </div>
-      <div className="mt-12 w-full max-w-xl">
+
+      <div className="mt-6 w-full max-w-xl">
         <InputArea previousId={previous} />
       </div>
       <p
-        className="mt-12 text-center text-sm text-gray-light"
+        className="mt-6 text-center text-sm text-gray-light"
         style={{ fontFamily: "var(--font-inter), sans-serif" }}
       >
         Reviewed against James Raybould&apos;s bar for executive documents.

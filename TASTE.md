@@ -24,12 +24,21 @@ Do not add taste he hasn't demonstrated.
 
 Ask these of any document, in this order:
 
+0. **What is this document for, and what does the author want from this audience?** Settle the occasion first: a decision memo, a pre-read, a deck presented live, a first meeting or working session. Take the author's stated goal when given; otherwise infer it from the document. Every later question is judged against that goal, for that audience. The review connects the goal to what the document gets: does it get this audience to the outcome the author wants?
 1. **So what?** What is the one-sentence message? If you cannot state it in 25 words, the document has failed before formatting even matters.
 2. **What's the ask?** What decision, action, or response does the author want from the reader, and is it unmissable on page one? A document that buries its ask is a document that gets ignored.
 3. **Would the audience actually do this?** Not "is this internally elegant" but "will the real reader, with their real attention span and real constraints, actually read it, get it, and act?" The audience-reality check beats internal elegance every time.
 4. **Is it boring?** Competent but flat is a failure state, not a passing grade. Boring is the cardinal sin.
-5. **Where does it break?** What objection, missing number, or unanswered question will derail this in the room? Good documents anticipate the hard part before it arrives.
-6. **What does done look like?** Does the document define success concretely enough that someone could execute against it without the author standing over them?
+5. **Where does it break?** What objection, missing number, or unanswered question will this audience actually raise in the room? Good documents anticipate the hard part before it arrives. Only questions this audience would ask count; a question nobody in that room would raise is not a gap.
+6. **What does done look like?** Does the document define success concretely enough for its occasion?
+
+**The bar for specificity follows the occasion.**
+<!-- Provenance: James, 17 Nov 2026, on the R365 leadership deck scored 75: "sometimes for first meetings, we don't want to be too anal"; "nobody is going to ask 53% of how many, it's not a real gap"; "ensure we're connecting the goal to what we get". -->
+
+- A **decision memo or pre-read** must work without the author in the room: owners, dates, numbers and the ask on page one.
+- A **deck presented live, a first meeting or a working session** needs a clear point of view, a reason this audience should care, and a next step. Detail the room is meant to fill in (owners, dates, final goals marked "for discussion") is a design choice, not a gap. Do not ask it for decision-paper detail.
+- **Data the audience already owns needs no methodology note.** A team's own survey shown to that team's leaders does not need a sample size on the slide.
+- Actions and rewrites follow the same rule: never prescribe detail the occasion does not need.
 
 ## 2. The Three Dimensions
 
@@ -97,6 +106,7 @@ The score has one job: to tell the author how much work is left. A number that s
   - **1–1.5** — absent or actively working against the document.
 - **Do not round up.** If torn between two bands, take the lower one. The generous instinct is what broke the previous calibration.
 - **The number and the words must agree.** A buried ask is not a 4.5 with a sharp verdict attached. If the prose says the document fails to land its ask, Intent scores accordingly. Never let a kind number contradict a true sentence.
+- **Score against the occasion.** A document that gets its audience to the author's goal, with small holes that do not matter for that occasion, scores 4-4.5. Do not mark it down for missing detail the occasion does not call for.
 - **Score the document in front of you, not the effort behind it.** Research, length, and polish are not scores. Whether the reader gets it and acts is the score.
 
 ## 6. How Feedback Is Given
