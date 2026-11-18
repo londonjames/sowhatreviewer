@@ -45,9 +45,11 @@ export default function InputArea({ previousId }: InputAreaProps) {
   // The home title and scale hide while a review streams (globals.css). Show
   // them again if the review fails, and when leaving for the finished review.
   useEffect(() => {
-    if (!loading) delete document.documentElement.dataset.reviewing;
+    const root = document.documentElement;
+    if (loading) root.dataset.reviewing = "1";
+    else delete root.dataset.reviewing;
     return () => {
-      delete document.documentElement.dataset.reviewing;
+      delete root.dataset.reviewing;
     };
   }, [loading]);
 
@@ -111,7 +113,6 @@ export default function InputArea({ previousId }: InputAreaProps) {
     setLoading(true);
     setError("");
     setPartial({});
-    document.documentElement.dataset.reviewing = "1";
     window.scrollTo({ top: 0 });
 
     const shapeOptions = {
