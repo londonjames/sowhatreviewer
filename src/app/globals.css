@@ -35,7 +35,9 @@
   --ui-green: #067647;
 }
 
-:root[data-theme="dark"] {
+/* Dark applies only inside .themed (home and review pages), so the /team pages,
+   which reuse the review components on a white page, stay light. */
+:root[data-theme="dark"] .themed {
   --ui-page: #1c1c1c;
   --ui-ink: #f5f5f5;
   --ui-ink-2: #9ca3af;
