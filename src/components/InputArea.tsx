@@ -14,7 +14,34 @@ const ACCEPTED_EXTENSIONS = ["pdf", "docx", "doc", "pptx", "ppt", "txt", "md"];
 const FIELD_CLASS =
   "w-full resize-y rounded-lg border border-gray-border bg-white px-5 py-3 text-base leading-relaxed text-foreground placeholder:text-gray-light outline-none transition-colors focus:border-foreground";
 
-const LABEL_CLASS = "mb-1.5 block text-left text-base text-gray";
+const LABEL_CLASS = "mb-1.5 block text-left text-sm text-gray";
+
+const SERIF = { fontFamily: "var(--font-garamond), Georgia, serif" };
+
+function StepHeading({
+  n,
+  title,
+  note,
+}: {
+  n: number;
+  title: string;
+  note?: string;
+}) {
+  return (
+    <div className="mb-4 flex items-center gap-4 text-left">
+      <span
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1a5a8a] text-2xl font-semibold italic text-white"
+        style={SERIF}
+      >
+        {n}
+      </span>
+      <h2 className="text-2xl font-medium text-foreground md:text-[1.7rem]" style={SERIF}>
+        {title}
+        {note && <span className="ml-2 text-lg italic text-gray-light">{note}</span>}
+      </h2>
+    </div>
+  );
+}
 
 interface InputAreaProps {
   /** Set when re-reviewing an edited document against an earlier review. */
@@ -215,7 +242,12 @@ export default function InputArea({ previousId }: InputAreaProps) {
   }
 
   return (
-    <div className="flex w-full flex-col gap-5">
+    <div className="flex w-full flex-col gap-10">
+      <section className="flex flex-col gap-3">
+      <StepHeading
+        n={1}
+        title={previousId ? "Paste your revised document" : "Paste your document"}
+      />
       <textarea
         value={text}
         onChange={handleTextChange}
@@ -263,12 +295,13 @@ export default function InputArea({ previousId }: InputAreaProps) {
         />
       </div>
 
-      <div className="flex flex-col gap-4 border-t border-gray-border pt-5">
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <StepHeading n={2} title="Describe your audience and goal" note="optional" />
         <div>
           <label htmlFor="audience" className={LABEL_CLASS}>
-            Describe your audience and any other context our reviewer should
-            know{" "}
-            <span className="text-gray-light">(optional)</span>
+            Who will read it, and what do they care about?
           </label>
           <textarea
             id="audience"
@@ -282,8 +315,7 @@ export default function InputArea({ previousId }: InputAreaProps) {
 
         <div>
           <label htmlFor="intended" className={LABEL_CLASS}>
-            In one sentence, what&apos;s the main So What you intend your doc to
-            convey? <span className="text-gray-light">(optional)</span>
+            In one sentence, what should they take away?
           </label>
           <input
             id="intended"
@@ -294,7 +326,7 @@ export default function InputArea({ previousId }: InputAreaProps) {
             className={FIELD_CLASS}
           />
         </div>
-      </div>
+      </section>
 
       {error && <p className="text-center text-sm text-red-700">{error}</p>}
 

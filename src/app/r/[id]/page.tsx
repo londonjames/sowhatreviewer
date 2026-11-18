@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { EvaluationResult, ratingName as computeRatingName } from "@/lib/types";
-import { reviewToMarkdown } from "@/lib/markdown";
 import ReviewBody from "@/components/ReviewBody";
 
 interface StoredResult {
@@ -83,8 +82,10 @@ export default function SavedReviewPage() {
   );
 }
 
-const ACTION_CLASS =
-  "rounded-lg border border-gray-border px-6 py-3 text-sm uppercase tracking-[0.15em] text-[#1a5a8a] transition-colors hover:border-[#1a5a8a] hover:bg-[#1a5a8a] hover:text-white";
+const BUTTON_CLASS =
+  "rounded-lg border px-5 py-2.5 text-sm font-medium transition-colors";
+const SECONDARY_CLASS =
+  "border-gray-border text-[#1a5a8a] hover:border-[#1a5a8a]";
 
 function ReviewLayout({
   stored,
@@ -95,7 +96,7 @@ function ReviewLayout({
   reviewId: string;
   router: ReturnType<typeof useRouter>;
 }) {
-  const [copied, setCopied] = useState<"link" | "text" | null>(null);
+  const [copied, setCopied] = useState(false);
 
   // Backward compat: early evaluations used a single `mirror` string.
   const raw = stored.evaluation as EvaluationResult & { mirror?: string };
@@ -109,13 +110,11 @@ function ReviewLayout({
     red_team: raw.red_team || [],
   };
 
-  const copy = async (kind: "link" | "text") => {
-    const payload =
-      kind === "link" ? window.location.href : reviewToMarkdown(result);
+  const share = async () => {
     try {
-      await navigator.clipboard.writeText(payload);
-      setCopied(kind);
-      setTimeout(() => setCopied(null), 1600);
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
     } catch {
       // Clipboard access can be denied; nothing useful to say here.
     }
@@ -126,34 +125,18 @@ function ReviewLayout({
       <div className="w-full max-w-2xl">
         <ReviewBody result={result} truncated={stored.truncated} />
 
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-12 flex items-center justify-center gap-3">
           <button
             onClick={() => router.push(`/?previous=${reviewId}`)}
-            className="rounded-lg border border-[#1a5a8a] bg-[#1a5a8a] px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition-colors hover:bg-white hover:text-[#1a5a8a]"
-            style={{ fontFamily: "var(--font-inter), sans-serif" }}
+            className={`${BUTTON_CLASS} border-[#1a5a8a] bg-[#1a5a8a] text-white hover:bg-white hover:text-[#1a5a8a]`}
           >
-            Re-review after edits
+            Re-review
           </button>
-          <button
-            onClick={() => copy("link")}
-            className={ACTION_CLASS}
-            style={{ fontFamily: "var(--font-inter), sans-serif" }}
-          >
-            {copied === "link" ? "Link copied" : "Share this review"}
+          <button onClick={share} className={`${BUTTON_CLASS} ${SECONDARY_CLASS}`}>
+            {copied ? "Link copied" : "Share"}
           </button>
-          <button
-            onClick={() => copy("text")}
-            className={ACTION_CLASS}
-            style={{ fontFamily: "var(--font-inter), sans-serif" }}
-          >
-            {copied === "text" ? "Copied" : "Copy as text"}
-          </button>
-          <button
-            onClick={() => router.push("/")}
-            className={ACTION_CLASS}
-            style={{ fontFamily: "var(--font-inter), sans-serif" }}
-          >
-            New document
+          <button onClick={() => router.push("/")} className={`${BUTTON_CLASS} ${SECONDARY_CLASS}`}>
+            New review
           </button>
         </div>
 

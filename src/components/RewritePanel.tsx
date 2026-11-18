@@ -21,25 +21,59 @@ function InlineText({ text }: { text: string }) {
   );
 }
 
-/** Render a markdown table when the rewrite is one, otherwise plain paragraphs. */
+type Block = { kind: "text"; line: string } | { kind: "table"; lines: string[] };
+
+/** Split a rewrite into paragraphs and markdown tables, in order. */
+function toBlocks(text: string): Block[] {
+  const blocks: Block[] = [];
+  for (const line of text.trim().split("\n")) {
+    if (!line.trim()) continue;
+    const last = blocks[blocks.length - 1];
+    if (line.trim().startsWith("|")) {
+      if (last?.kind === "table") last.lines.push(line);
+      else blocks.push({ kind: "table", lines: [line] });
+    } else {
+      blocks.push({ kind: "text", line });
+    }
+  }
+  // A table needs a header and a separator row; anything less is just text.
+  return blocks.flatMap((b) =>
+    b.kind === "table" && !(b.lines.length >= 2 && /^\s*\|[\s:|-]+\|\s*$/.test(b.lines[1]))
+      ? b.lines.map((line) => ({ kind: "text" as const, line }))
+      : [b]
+  );
+}
+
+/** Render a rewrite: paragraphs, with any markdown tables drawn as tables. */
 function RewriteBody({ text }: { text: string }) {
-  const lines = text.trim().split("\n");
-  const isTable =
-    lines.length >= 2 &&
-    lines[0].trim().startsWith("|") &&
-    /^\s*\|[\s:|-]+\|\s*$/.test(lines[1]);
+  return (
+    <>
+      {toBlocks(text).map((block, i) => (
+        <div key={i} className={i > 0 ? "mt-3" : undefined}>
+          {block.kind === "table" ? (
+            <RewriteTable lines={block.lines} />
+          ) : (
+            <p>
+              <InlineText text={block.line} />
+            </p>
+          )}
+        </div>
+      ))}
+    </>
+  );
+}
 
-  if (isTable) {
-    const cells = (line: string) =>
-      line
-        .trim()
-        .replace(/^\||\|$/g, "")
-        .split("|")
-        .map((c) => c.trim());
-    const header = cells(lines[0]);
-    const rows = lines.slice(2).filter((l) => l.trim().startsWith("|")).map(cells);
+function RewriteTable({ lines }: { lines: string[] }) {
+  const cells = (line: string) =>
+    line
+      .trim()
+      .replace(/^\||\|$/g, "")
+      .split("|")
+      .map((c) => c.trim());
+  const header = cells(lines[0]);
+  const rows = lines.slice(2).map(cells);
 
-    return (
+  return (
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-base">
           <thead>
@@ -72,19 +106,6 @@ function RewriteBody({ text }: { text: string }) {
           </tbody>
         </table>
       </div>
-    );
-  }
-
-  return (
-    <>
-      {lines
-        .filter((line) => line.trim())
-        .map((line, i) => (
-          <p key={i} className={i > 0 ? "mt-3" : undefined}>
-            <InlineText text={line} />
-          </p>
-        ))}
-    </>
   );
 }
 

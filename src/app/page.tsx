@@ -98,16 +98,8 @@ export default async function Home({
           </div>
         </div>
 
-        {/* Input */}
-        <div className="mt-8">
-          <p className="text-lg text-gray md:text-xl">
-            {previous
-              ? "Paste your revised document below, and we'll tell you what changed."
-              : "Paste your document below, or add a file."}
-          </p>
-        </div>
       </div>
-      <div className="mt-4 w-full max-w-lg">
+      <div className="mt-12 w-full max-w-xl">
         <InputArea previousId={previous} />
       </div>
       <p
