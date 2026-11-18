@@ -1,33 +1,20 @@
-interface MirrorSectionProps {
-  lead: string;
-  bullets: string[];
-}
+import SectionHeading from "./SectionHeading";
 
-export default function MirrorSection({ lead, bullets }: MirrorSectionProps) {
+export default function MirrorSection({ lead, bullets }: { lead: string; bullets: string[] }) {
   return (
-    <div>
-      <h2
-        className="text-xl uppercase tracking-[0.2em]"
-        style={{ fontFamily: "var(--font-inter), sans-serif", color: "#1a5a8a" }}
-      >
-        The Main So What Your Doc Conveys
-      </h2>
-      <p className="mt-4 text-xl font-semibold leading-snug text-foreground">
-        {lead}
-      </p>
+    <section>
+      <SectionHeading>The So What your doc conveys</SectionHeading>
+      <p className="mt-3 text-[19px] font-semibold leading-snug text-[var(--ui-ink)]">{lead}</p>
       {bullets.length > 0 && (
-        <ul className="mt-4 space-y-2">
+        <ul className="mt-4 space-y-2.5">
           {bullets.map((bullet, i) => (
-            <li
-              key={i}
-              className="flex gap-3 text-xl leading-relaxed text-gray"
-            >
-              <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gray-light" />
+            <li key={i} className="flex gap-3 text-[17px] leading-relaxed text-[var(--ui-ink-2)]">
+              <span className="mt-[11px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ui-muted)]" />
               {bullet}
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </section>
   );
 }

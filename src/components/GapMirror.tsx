@@ -1,45 +1,22 @@
 import { GapMirror as GapMirrorData } from "@/lib/types";
+import { Label } from "./SectionHeading";
 
-const LABEL_CLASS =
-  "text-xs font-semibold uppercase tracking-[0.15em] text-gray";
-
-interface GapMirrorProps {
-  gap: GapMirrorData;
-}
-
-export default function GapMirror({ gap }: GapMirrorProps) {
+export default function GapMirror({ gap }: { gap: GapMirrorData }) {
   return (
-    <section
-      className="rounded-lg border p-6"
-      style={{ borderColor: "#1a5a8a", backgroundColor: "#f7fafc" }}
-    >
-      <div className="grid gap-6 md:grid-cols-2">
+    <section className="rounded-2xl border border-[var(--ui-line)] bg-[var(--ui-card)] p-6">
+      <div className="grid gap-6 sm:grid-cols-2">
         <div>
-          <p className={LABEL_CLASS} style={{ fontFamily: "var(--font-inter), sans-serif" }}>
-            What you meant
-          </p>
-          <p className="mt-2 text-lg leading-relaxed text-gray">
-            {gap.intended}
-          </p>
+          <Label>What you meant</Label>
+          <p className="mt-2 text-[17px] leading-relaxed text-[var(--ui-ink-2)]">{gap.intended}</p>
         </div>
         <div>
-          <p className={LABEL_CLASS} style={{ fontFamily: "var(--font-inter), sans-serif" }}>
-            What landed
-          </p>
-          <p className="mt-2 text-lg leading-relaxed text-gray">{gap.landed}</p>
+          <Label>What landed</Label>
+          <p className="mt-2 text-[17px] leading-relaxed text-[var(--ui-ink-2)]">{gap.landed}</p>
         </div>
       </div>
-
-      <div className="mt-6 border-t pt-5" style={{ borderColor: "#cbd9e4" }}>
-        <p
-          className="text-xs font-semibold uppercase tracking-[0.15em]"
-          style={{ fontFamily: "var(--font-inter), sans-serif", color: "#1a5a8a" }}
-        >
-          The gap
-        </p>
-        <p className="mt-2 text-xl font-semibold leading-snug text-foreground">
-          {gap.gap}
-        </p>
+      <div className="mt-6 border-t border-[var(--ui-line)] pt-5">
+        <Label className="!text-[var(--ui-accent-text)]">The gap</Label>
+        <p className="mt-2 text-[19px] font-semibold leading-snug text-[var(--ui-ink)]">{gap.gap}</p>
       </div>
     </section>
   );

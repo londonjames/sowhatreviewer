@@ -1,111 +1,63 @@
 import StarRating from "./StarRating";
+import SectionHeading, { Label } from "./SectionHeading";
 import { CategoryEvaluation } from "@/lib/types";
 
 const CATEGORY_NUMBER: Record<string, string> = {
-  Intent: "(1)",
-  Delivery: "(2)",
-  Narrative: "(3)",
+  Intent: "01",
+  Delivery: "02",
+  Narrative: "03",
 };
 
-interface CategoryCardProps {
-  category: CategoryEvaluation;
-}
-
-export default function CategoryCard({ category }: CategoryCardProps) {
+export default function CategoryCard({ category }: { category: CategoryEvaluation }) {
   const actions = category.actions?.length
     ? category.actions
     : category.improvement
       ? [category.improvement]
       : [];
 
-  // Parse feedback into bullet points (split on sentences)
+  // One bullet per sentence of the feedback.
   const feedbackBullets = category.feedback
-    ? category.feedback
-        .split(/(?<=\.)\s+/)
-        .filter((s) => s.trim().length > 10)
+    ? category.feedback.split(/(?<=\.)\s+/).filter((s) => s.trim().length > 10)
     : [];
 
   return (
-    <section className="py-6">
-      <div className="flex items-center gap-4">
-        <h2
-          className="text-lg uppercase tracking-[0.2em]"
-          style={{ fontFamily: "var(--font-inter), sans-serif", color: "#1a5a8a" }}
-        >
-          {CATEGORY_NUMBER[category.name]} {category.name}
-        </h2>
+    <section>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+        <SectionHeading number={CATEGORY_NUMBER[category.name]}>{category.name}</SectionHeading>
         <StarRating rating={category.score} />
       </div>
 
       {category.headline && (
-        <p className="mt-3 text-xl font-semibold leading-snug text-foreground">
+        <p className="mt-2 text-[19px] font-semibold leading-snug text-[var(--ui-ink)]">
           {category.headline.replace(/\*\*/g, "")}
         </p>
       )}
 
-      <div className="mt-6 grid grid-cols-[1fr_auto_1fr] gap-6 items-start">
+      <div className="mt-5 grid gap-6 sm:grid-cols-2 sm:gap-8">
         <div>
-          <p
-            className="text-xs font-semibold uppercase tracking-[0.15em] text-gray"
-            style={{ fontFamily: "var(--font-inter), sans-serif" }}
-          >
-            Current State
-          </p>
-          <ul className="mt-3 space-y-2">
+          <Label>Current state</Label>
+          <ul className="mt-2.5 space-y-2.5">
             {feedbackBullets.map((bullet, i) => (
-              <li
-                key={i}
-                className="flex gap-2.5 text-lg leading-relaxed text-gray"
-              >
-                <span className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gray-light" />
+              <li key={i} className="flex gap-2.5 text-base leading-relaxed text-[var(--ui-ink-2)]">
+                <span className="mt-[10px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--ui-muted)]" />
                 {bullet}
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="flex items-start pt-8 text-gray-border">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <path
-              d="M4 10h12M12 5l5 5-5 5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-
         <div>
-          <p
-            className="text-xs font-semibold uppercase tracking-[0.15em] text-gray"
-            style={{ fontFamily: "var(--font-inter), sans-serif" }}
-          >
-            Recommended Action Items
-          </p>
-          <ol className="mt-3 space-y-3">
+          <Label>What to do</Label>
+          <ol className="mt-2.5 space-y-2.5">
             {actions.map((action, i) => {
               const colonIdx = action.indexOf(":");
-              const hasBoldPrefix = colonIdx > 0 && colonIdx < 60;
-
+              const hasPrefix = colonIdx > 0 && colonIdx < 60;
               return (
-                <li
-                  key={i}
-                  className="flex gap-2.5 text-lg leading-relaxed text-gray"
-                >
-                  <span className="shrink-0 font-semibold text-foreground">
-                    {i + 1}.
-                  </span>
-                  {hasBoldPrefix ? (
+                <li key={i} className="flex gap-2.5 text-base leading-relaxed text-[var(--ui-ink-2)]">
+                  <span className="shrink-0 font-semibold text-[var(--ui-accent-text)] tabular-nums">{i + 1}</span>
+                  {hasPrefix ? (
                     <span>
-                      <span className="font-semibold text-foreground">
-                        {action.slice(0, colonIdx + 1)}
-                      </span>{" "}
+                      <span className="font-semibold text-[var(--ui-ink)]">{action.slice(0, colonIdx + 1)}</span>{" "}
                       {action.slice(colonIdx + 1).trim()}
                     </span>
                   ) : (

@@ -17,17 +17,14 @@ interface ReviewBodyProps {
 }
 
 function Rule() {
-  return <hr className="border-foreground/20" />;
+  return <hr className="border-[var(--ui-line)]" />;
 }
 
 function Pending({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-3 py-2">
-      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gray-light" />
-      <p
-        className="text-xs uppercase tracking-[0.15em] text-gray-light"
-        style={{ fontFamily: "var(--font-inter), sans-serif" }}
-      >
+      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--ui-accent)]" />
+      <p className="text-sm text-[var(--ui-muted)]">
         {label}
       </p>
     </div>
@@ -46,10 +43,9 @@ export default function ReviewBody({
     push(
       <div
         key="truncated"
-        className="rounded-lg border p-4"
-        style={{ borderColor: "#d97706", backgroundColor: "#fffbf2" }}
+        className="rounded-2xl border border-[var(--ui-amber)] p-4"
       >
-        <p className="text-base text-foreground">
+        <p className="text-base text-[var(--ui-ink)]">
           <span className="font-semibold">This document was too long to read in full.</span>{" "}
           The review covers roughly the first 300,000 characters, so anything
           after that point was not assessed.
@@ -82,10 +78,7 @@ export default function ReviewBody({
   } else if (result.verdict) {
     push(
       <div key="verdict-only" className="flex justify-center">
-        <p
-          className="max-w-xl text-center text-[1.7rem] font-bold italic leading-snug"
-          style={{ fontFamily: "var(--font-garamond), Georgia, serif" }}
-        >
+        <p className="max-w-[600px] text-balance text-center text-[20px] font-semibold leading-snug text-[var(--ui-ink)]">
           {result.verdict}
         </p>
       </div>

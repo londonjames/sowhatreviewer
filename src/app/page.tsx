@@ -39,7 +39,7 @@ function Stamp({ src, alt, ratio, style }: { src: string; alt: string; ratio: nu
 
 function Scale() {
   return (
-    <div className="rounded-[20px] border border-[var(--home-panel-border)] bg-[var(--home-panel)] px-4 pt-5 pb-3 scale-h sm:px-7 sm:pt-6">
+    <div className="rounded-[20px] border border-[var(--ui-panel-border)] bg-[var(--ui-panel)] px-4 pt-5 pb-3 scale-h sm:px-7 sm:pt-6">
       <div className="relative" style={{ height: "var(--h)" }}>
         <Stamp src="/stamps/trim/nope.png" alt="Nope" ratio={NOPE} style={{ left: 0 }} />
         <Stamp
@@ -89,17 +89,17 @@ export default async function Home({
   const { previous } = await searchParams;
 
   return (
-    <div className="min-h-screen bg-[var(--home-page)] px-6 pt-16 pb-8 sm:pt-8 text-[var(--home-ink)] transition-colors">
+    <div className="min-h-screen bg-[var(--ui-page)] px-6 pt-16 pb-8 sm:pt-8 text-[var(--ui-ink)] transition-colors">
       <ThemeToggle />
       <div className="mx-auto w-full max-w-[680px]">
         <h1 className="text-balance text-center text-[30px] font-semibold leading-[1.12] tracking-[-0.03em] sm:text-[40px] lg:whitespace-nowrap">
           Does your doc have a clear{" "}
-          <span className="whitespace-nowrap text-[var(--home-accent)]">So What?</span>
+          <span className="whitespace-nowrap text-[var(--ui-accent)]">So What?</span>
         </h1>
-        <p className="mt-3 text-center text-[17px] text-[var(--home-ink-2)] sm:text-[20px]">
-          Is its <strong className="font-semibold text-[var(--home-ink)]">intent</strong> clear? Does it{" "}
-          <strong className="font-semibold text-[var(--home-ink)]">deliver</strong>? Is there a strong{" "}
-          <strong className="font-semibold text-[var(--home-ink)]">narrative</strong>?
+        <p className="mt-3 text-center text-[17px] text-[var(--ui-ink-2)] sm:text-[20px]">
+          Is its <strong className="font-semibold text-[var(--ui-ink)]">intent</strong> clear? Does it{" "}
+          <strong className="font-semibold text-[var(--ui-ink)]">deliver</strong>? Is there a strong{" "}
+          <strong className="font-semibold text-[var(--ui-ink)]">narrative</strong>?
         </p>
 
         <div className="mt-6">

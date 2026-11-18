@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { EvaluationResult } from "@/lib/types";
 import ReviewBody from "@/components/ReviewBody";
+import PageShell, { SECONDARY_BUTTON } from "@/components/PageShell";
 
 interface StoredResult {
   evaluation: EvaluationResult;
@@ -35,37 +36,25 @@ export default function ReviewPage() {
       router.replace("/");
     }
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-border border-t-accent" />
-      </div>
+      <PageShell>
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--ui-line)] border-t-[var(--ui-accent)]" />
+        </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="flex flex-col items-center px-6 py-16">
-      <div className="w-full max-w-2xl">
-        <ReviewBody
-          result={stored.evaluation}
-          truncated={stored.truncated}
-        />
-
-        <div className="flex justify-center pt-12">
-          <button
-            onClick={() => router.push("/")}
-            className="rounded-lg border border-gray-border px-8 py-3 text-sm uppercase tracking-[0.15em] text-[#1a5a8a] transition-colors hover:border-[#1a5a8a] hover:bg-[#1a5a8a] hover:text-white"
-            style={{ fontFamily: "var(--font-inter), sans-serif" }}
-          >
-            Review another document
-          </button>
-        </div>
-
-        <p
-          className="mt-10 text-center text-sm text-gray-light"
-          style={{ fontFamily: "var(--font-inter), sans-serif" }}
-        >
-          Reviewed against James Raybould&apos;s bar for executive documents.
-        </p>
+    <PageShell>
+      <ReviewBody result={stored.evaluation} truncated={stored.truncated} />
+      <div className="flex justify-center pt-12">
+        <button onClick={() => router.push("/")} className={SECONDARY_BUTTON}>
+          Review another document
+        </button>
       </div>
-    </div>
+      <p className="mt-10 text-center text-sm text-[var(--ui-muted)]">
+        Reviewed against James Raybould&apos;s bar for executive documents.
+      </p>
+    </PageShell>
   );
 }

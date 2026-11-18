@@ -12,15 +12,15 @@ const ACCEPTED = ".pdf,.docx,.doc,.pptx,.ppt,.txt,.md";
 const ACCEPTED_EXTENSIONS = ["pdf", "docx", "doc", "pptx", "ppt", "txt", "md"];
 
 const FIELD_CLASS =
-  "w-full resize-none rounded-xl border border-[var(--home-field-border)] bg-[var(--home-field)] px-4 py-3 text-base leading-relaxed text-[var(--home-ink)] placeholder:text-[var(--home-muted)] outline-none transition focus:border-[var(--home-accent)] focus:ring-4 focus:ring-[var(--home-accent)]/15";
+  "w-full resize-none rounded-xl border border-[var(--ui-field-border)] bg-[var(--ui-field)] px-4 py-3 text-base leading-relaxed text-[var(--ui-ink)] placeholder:text-[var(--ui-muted)] outline-none transition focus:border-[var(--ui-accent)] focus:ring-4 focus:ring-[var(--ui-accent)]/15";
 
 
 function StepHeading({ n, title, note }: { n: number; title: string; note?: string }) {
   return (
-    <h2 className="mb-2.5 text-left text-[19px] font-semibold tracking-[-0.01em] text-[var(--home-ink)]">
-      <span className="mr-2.5 text-[var(--home-accent)]">{String(n).padStart(2, "0")}</span>
+    <h2 className="mb-2.5 text-left text-[19px] font-semibold tracking-[-0.01em] text-[var(--ui-ink)]">
+      <span className="mr-2.5 text-[var(--ui-accent)]">{String(n).padStart(2, "0")}</span>
       {title}
-      {note && <span className="ml-2 text-[15px] font-normal text-[var(--home-muted)]">{note}</span>}
+      {note && <span className="ml-2 text-[15px] font-normal text-[var(--ui-muted)]">{note}</span>}
     </h2>
   );
 }
@@ -196,14 +196,14 @@ export default function InputArea({ previousId }: InputAreaProps) {
       <div className="flex w-full flex-col items-center gap-8 py-8">
         {!hasContent && (
           <>
-            <p className="text-xl text-[var(--home-ink)]">
+            <p className="text-xl text-[var(--ui-ink)]">
               Reading your document...
             </p>
             <div className="flex items-center gap-2">
               {[0, 1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="h-1.5 w-8 animate-pulse rounded-full bg-[var(--home-field-border)]"
+                  className="h-1.5 w-8 animate-pulse rounded-full bg-[var(--ui-field-border)]"
                   style={{ animationDelay: `${i * 200}ms` }}
                 />
               ))}
@@ -211,8 +211,7 @@ export default function InputArea({ previousId }: InputAreaProps) {
           </>
         )}
         {hasContent && (
-          // The review has fixed light colours, so it sits on a white card in dark mode too.
-          <div className="w-full rounded-2xl bg-white p-4 text-left text-foreground sm:p-6">
+          <div className="w-full text-left">
             <ReviewBody result={partial} streaming />
           </div>
         )}
@@ -246,17 +245,17 @@ export default function InputArea({ previousId }: InputAreaProps) {
         onClick={() => fileInputRef.current?.click()}
         className={`flex cursor-pointer items-center justify-center gap-3 rounded-xl border border-dashed py-3 transition-colors ${
           dragOver || file
-            ? "border-[var(--home-accent)]"
-            : "border-[var(--home-drop-border)] hover:border-[var(--home-accent)]"
+            ? "border-[var(--ui-accent)]"
+            : "border-[var(--ui-drop-border)] hover:border-[var(--ui-accent)]"
         }`}
       >
         {file ? (
-          <p className="text-sm text-[var(--home-ink)]">
+          <p className="text-sm text-[var(--ui-ink)]">
             <span className="font-medium">{file.name}</span>
-            <span className="ml-2 text-[var(--home-muted)]">(click to replace)</span>
+            <span className="ml-2 text-[var(--ui-muted)]">(click to replace)</span>
           </p>
         ) : (
-          <p className="text-sm text-[var(--home-drop-text)]">
+          <p className="text-sm text-[var(--ui-drop-text)]">
             or drop a PDF, Word or PowerPoint file
           </p>
         )}
@@ -291,7 +290,7 @@ export default function InputArea({ previousId }: InputAreaProps) {
 
       <button
         onClick={handleSubmit}
-        className="rounded-[14px] bg-[var(--home-accent)] px-10 py-4 text-[17px] font-bold text-white transition hover:bg-[#1d4ed8] active:translate-y-px"
+        className="rounded-[14px] bg-[var(--ui-accent)] px-10 py-4 text-[17px] font-bold text-white transition hover:bg-[#1d4ed8] active:translate-y-px"
       >
         {previousId ? "Re-review my document" : "Review my document"}
       </button>

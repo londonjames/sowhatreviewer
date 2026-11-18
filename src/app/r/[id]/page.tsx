@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { EvaluationResult, ratingName as computeRatingName } from "@/lib/types";
 import ReviewBody from "@/components/ReviewBody";
+import PageShell, { PRIMARY_BUTTON, SECONDARY_BUTTON } from "@/components/PageShell";
 
 interface StoredResult {
   evaluation: EvaluationResult;
@@ -53,23 +54,24 @@ export default function SavedReviewPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-border border-t-accent" />
-      </div>
+      <PageShell>
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--ui-line)] border-t-[var(--ui-accent)]" />
+        </div>
+      </PageShell>
     );
   }
 
   if (error || !stored) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
-        <p className="text-lg text-gray">{error || "Review not found."}</p>
-        <button
-          onClick={() => router.push("/")}
-          className="rounded-xl border border-gray-border px-6 py-2 text-sm text-foreground hover:bg-surface"
-        >
-          Go Home
-        </button>
-      </div>
+      <PageShell>
+        <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
+          <p className="text-lg text-[var(--ui-ink-2)]">{error || "Review not found."}</p>
+          <button onClick={() => router.push("/")} className={SECONDARY_BUTTON}>
+            Review a document
+          </button>
+        </div>
+      </PageShell>
     );
   }
 
@@ -82,10 +84,6 @@ export default function SavedReviewPage() {
   );
 }
 
-const BUTTON_CLASS =
-  "rounded-lg border px-5 py-2.5 text-sm font-medium transition-colors";
-const SECONDARY_CLASS =
-  "border-gray-border text-[#1a5a8a] hover:border-[#1a5a8a]";
 
 function ReviewLayout({
   stored,
@@ -121,32 +119,24 @@ function ReviewLayout({
   };
 
   return (
-    <div className="flex flex-col items-center px-6 py-16">
-      <div className="w-full max-w-2xl">
-        <ReviewBody result={result} truncated={stored.truncated} />
+    <PageShell>
+      <ReviewBody result={result} truncated={stored.truncated} />
 
-        <div className="mt-12 flex items-center justify-center gap-3">
-          <button
-            onClick={() => router.push(`/?previous=${reviewId}`)}
-            className={`${BUTTON_CLASS} border-[#1a5a8a] bg-[#1a5a8a] text-white hover:bg-white hover:text-[#1a5a8a]`}
-          >
-            Re-review
-          </button>
-          <button onClick={share} className={`${BUTTON_CLASS} ${SECONDARY_CLASS}`}>
-            {copied ? "Link copied" : "Share"}
-          </button>
-          <button onClick={() => router.push("/")} className={`${BUTTON_CLASS} ${SECONDARY_CLASS}`}>
-            New review
-          </button>
-        </div>
-
-        <p
-          className="mt-10 text-center text-sm text-gray-light"
-          style={{ fontFamily: "var(--font-inter), sans-serif" }}
-        >
-          Reviewed against James Raybould&apos;s bar for executive documents.
-        </p>
+      <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
+        <button onClick={() => router.push(`/?previous=${reviewId}`)} className={PRIMARY_BUTTON}>
+          Re-review
+        </button>
+        <button onClick={share} className={SECONDARY_BUTTON}>
+          {copied ? "Link copied" : "Share"}
+        </button>
+        <button onClick={() => router.push("/")} className={SECONDARY_BUTTON}>
+          New review
+        </button>
       </div>
-    </div>
+
+      <p className="mt-10 text-center text-sm text-[var(--ui-muted)]">
+        Reviewed against James Raybould&apos;s bar for executive documents.
+      </p>
+    </PageShell>
   );
 }

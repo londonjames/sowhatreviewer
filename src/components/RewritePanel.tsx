@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Rewrite } from "@/lib/types";
+import SectionHeading, { Label } from "./SectionHeading";
 
 /** Render **bold** spans; the model writes rewrites in light markdown. */
 function InlineText({ text }: { text: string }) {
@@ -75,14 +76,13 @@ function RewriteTable({ lines }: { lines: string[] }) {
 
   return (
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-base">
+        <table className="w-full border-collapse text-[15px]">
           <thead>
             <tr>
               {header.map((cell, i) => (
                 <th
                   key={i}
-                  className="border-b px-3 py-2 text-left font-semibold text-foreground"
-                  style={{ borderColor: "#cbd9e4" }}
+                  className="border-b border-[var(--ui-line)] px-3 py-2 text-left font-semibold text-[var(--ui-ink)]"
                 >
                   <InlineText text={cell} />
                 </th>
@@ -95,8 +95,7 @@ function RewriteTable({ lines }: { lines: string[] }) {
                 {row.map((cell, c) => (
                   <td
                     key={c}
-                    className="border-b px-3 py-2 align-top text-gray"
-                    style={{ borderColor: "#e8eef3" }}
+                    className="border-b border-[var(--ui-line)] px-3 py-2 align-top text-[var(--ui-ink-2)]"
                   >
                     <InlineText text={cell} />
                   </td>
@@ -123,49 +122,31 @@ function RewriteCard({ rewrite }: { rewrite: Rewrite }) {
   };
 
   return (
-    <div className="rounded-lg border border-gray-border p-5">
+    <div className="rounded-2xl border border-[var(--ui-line)] p-5">
       <div className="flex items-baseline justify-between gap-4">
-        <h3
-          className="text-sm font-semibold uppercase tracking-[0.15em]"
-          style={{ fontFamily: "var(--font-inter), sans-serif", color: "#1a5a8a" }}
-        >
-          {rewrite.label}
-        </h3>
+        <h3 className="text-[17px] font-semibold text-[var(--ui-ink)]">{rewrite.label}</h3>
         <button
           onClick={copy}
-          className="shrink-0 rounded border border-gray-border px-3 py-1 text-xs uppercase tracking-[0.1em] text-gray transition-colors hover:border-[#1a5a8a] hover:text-[#1a5a8a]"
-          style={{ fontFamily: "var(--font-inter), sans-serif" }}
+          className="shrink-0 rounded-lg border border-[var(--ui-field-border)] px-3 py-1 text-[13px] font-medium text-[var(--ui-ink-2)] transition-colors hover:border-[var(--ui-accent)] hover:text-[var(--ui-accent-text)]"
         >
           {copied ? "Copied" : "Copy"}
         </button>
       </div>
 
-      {rewrite.why && (
-        <p className="mt-2 text-base italic text-gray-light">{rewrite.why}</p>
-      )}
+      {rewrite.why && <p className="mt-1.5 text-[15px] leading-relaxed text-[var(--ui-ink-2)]">{rewrite.why}</p>}
 
       {rewrite.before && (
         <div className="mt-4">
-          <p
-            className="text-xs font-semibold uppercase tracking-[0.15em] text-gray-light"
-            style={{ fontFamily: "var(--font-inter), sans-serif" }}
-          >
-            Currently
-          </p>
-          <p className="mt-1.5 border-l-2 border-gray-border pl-3 text-base italic leading-relaxed text-gray-light">
+          <Label>Currently</Label>
+          <p className="mt-1.5 border-l-2 border-[var(--ui-line)] pl-3 text-[15px] leading-relaxed text-[var(--ui-muted)]">
             {rewrite.before}
           </p>
         </div>
       )}
 
       <div className="mt-4">
-        <p
-          className="text-xs font-semibold uppercase tracking-[0.15em] text-gray"
-          style={{ fontFamily: "var(--font-inter), sans-serif" }}
-        >
-          {rewrite.before ? "Use this instead" : "Add this"}
-        </p>
-        <div className="mt-1.5 border-l-2 pl-3 text-lg leading-relaxed text-foreground" style={{ borderColor: "#1a5a8a" }}>
+        <Label>{rewrite.before ? "Use this instead" : "Add this"}</Label>
+        <div className="mt-1.5 border-l-2 border-[var(--ui-accent)] pl-3 text-[17px] leading-relaxed text-[var(--ui-ink)]">
           <RewriteBody text={rewrite.after} />
         </div>
       </div>
@@ -178,13 +159,8 @@ export default function RewritePanel({ rewrites }: { rewrites: Rewrite[] }) {
 
   return (
     <section>
-      <h2
-        className="text-xl uppercase tracking-[0.2em]"
-        style={{ fontFamily: "var(--font-inter), sans-serif", color: "#1a5a8a" }}
-      >
-        Rewrites You Can Paste In
-      </h2>
-      <div className="mt-5 space-y-4">
+      <SectionHeading>Rewrites you can paste in</SectionHeading>
+      <div className="mt-4 space-y-4">
         {rewrites.map((rewrite, i) => (
           <RewriteCard key={i} rewrite={rewrite} />
         ))}
