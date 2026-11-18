@@ -24,11 +24,11 @@ const SAMPLES = [
 
 const TICKS: { text: string; color?: string }[] = [
   { text: "0" },
-  { text: "Lost" },
-  { text: "Muddled" },
+  { text: "Lost", color: "#b42318" },
+  { text: "Muddled", color: "#b54708" },
   { text: "50" },
-  { text: "Getting There" },
-  { text: "On Point" },
+  { text: "Getting There", color: "#175cd3" },
+  { text: "On Point", color: "#067647" },
   { text: "100" },
 ];
 
