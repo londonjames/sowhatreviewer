@@ -43,6 +43,8 @@ export interface EvaluationResult {
   red_team: string[];
   gap?: GapMirror;
   context?: DocumentContext;
+  /** The reviewed text, kept only for the published sample reviews so readers can see what was scored. */
+  document?: string;
   /** Set on a re-review: what changed since the previous pass. */
   progress?: {
     previous_overall: number;

@@ -47,6 +47,20 @@ export default function ReviewBody({
     );
   }
 
+  if (result.document && !streaming) {
+    push(
+      <details key="document" className="group rounded-2xl border border-[var(--ui-line)] bg-[var(--ui-card)]">
+        <summary className="cursor-pointer list-none px-5 py-4 text-[15px] font-semibold text-[var(--ui-accent-text)]">
+          <span className="group-open:hidden">Show the document that was reviewed</span>
+          <span className="hidden group-open:inline">Hide the document</span>
+        </summary>
+        <div className="whitespace-pre-wrap border-t border-[var(--ui-line)] px-5 py-4 text-[15px] leading-relaxed text-[var(--ui-ink-2)]">
+          {result.document}
+        </div>
+      </details>
+    );
+  }
+
   if (truncated) {
     push(
       <div key="truncated" className="rounded-2xl border border-[var(--ui-amber)] p-4">

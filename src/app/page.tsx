@@ -15,6 +15,13 @@ const NUDGE = 5; // px: measured on the live page; evens NOPE and CRYSTAL CLEAR 
 const left = `calc(var(--h) * ${NOPE / 2})`;
 const right = `calc(var(--h) * ${CLEAR / 2} + ${NUDGE}px)`;
 
+/** Published sample reviews of made-up documents (ids from publish.mjs), linked under the form. */
+const SAMPLES = [
+  { label: "Muddled", score: 43, id: "mwlins0680cv", color: "#b54708" },
+  { label: "On Point", score: 82, id: "mwlins7vdfmh", color: "#067647" },
+  { label: "Crystal Clear", score: 92, id: "mwlinsdtvggx", color: "#067647" },
+];
+
 const TICKS: { text: string; color?: string }[] = [
   { text: "0" },
   { text: "Lost", color: "#b42318" },
@@ -117,6 +124,23 @@ export default async function Home({
         <div className="home-form mx-auto mt-6 max-w-[560px]">
           <InputArea previousId={previous} />
         </div>
+        {SAMPLES.every((x) => x.id) && (
+          <p className="home-header mt-5 text-center text-[15px] text-[var(--ui-muted)]">
+            Want a sample?{" "}
+            {SAMPLES.map((x, i) => (
+              <span key={x.id}>
+                <a
+                  href={`/r/${x.id}`}
+                  className="font-medium underline decoration-[var(--ui-line)] underline-offset-4 hover:decoration-current"
+                  style={{ color: x.color }}
+                >
+                  {x.label} ({x.score})
+                </a>
+                {i === 0 ? ", " : i === 1 ? ", and " : ""}
+              </span>
+            ))}
+          </p>
+        )}
       </div>
     </div>
   );
