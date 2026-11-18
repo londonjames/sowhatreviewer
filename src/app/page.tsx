@@ -10,7 +10,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 const NOPE = 2.5329;
 const HAZY = 2.4301;
 const CLEAR = 2.8355;
-const NUDGE = 0; // px: adjust if the measured edge gaps differ.
+const NUDGE = 5; // px: measured on the live page; evens NOPE and CRYSTAL CLEAR edge gaps.
 
 const left = `calc(var(--h) * ${NOPE / 2})`;
 const right = `calc(var(--h) * ${CLEAR / 2} + ${NUDGE}px)`;
