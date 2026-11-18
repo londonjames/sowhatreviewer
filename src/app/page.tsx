@@ -7,10 +7,10 @@ import ThemeToggle from "@/components/ThemeToggle";
  * stamps, so NOPE and CRYSTAL CLEAR sit the same distance from the panel edges.
  * Ratios are width / height of the trimmed images in public/stamps/trim.
  */
-const NOPE = 2.4556;
-const HAZY = 2.3667;
-const CLEAR = 3.0248;
-const NUDGE = 5; // px: CRYSTAL CLEAR's ink runs to its image edge; NOPE's does not.
+const NOPE = 2.5329;
+const HAZY = 2.4301;
+const CLEAR = 2.8355;
+const NUDGE = 0; // px: adjust if the measured edge gaps differ.
 
 const left = `calc(var(--h) * ${NOPE / 2})`;
 const right = `calc(var(--h) * ${CLEAR / 2} + ${NUDGE}px)`;
