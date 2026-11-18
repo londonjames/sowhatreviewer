@@ -138,7 +138,7 @@ function RewriteCard({ rewrite }: { rewrite: Rewrite }) {
       {rewrite.before && (
         <div className="mt-4">
           <Label>Currently</Label>
-          <p className="mt-1.5 border-l-2 border-[var(--ui-line)] pl-3 text-[15px] leading-relaxed text-[var(--ui-muted)]">
+          <p className="mt-1.5 border-l-2 border-[var(--ui-line)] pl-3 text-[15px] leading-relaxed text-[var(--ui-ink-2)]">
             {rewrite.before}
           </p>
         </div>
