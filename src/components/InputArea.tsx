@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { EvaluationResult } from "@/lib/types";
 import { parsePartialJson } from "@/lib/partial-json";
@@ -41,6 +41,15 @@ export default function InputArea({ previousId }: InputAreaProps) {
   const [partial, setPartial] = useState<Partial<EvaluationResult>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  // The home title and scale hide while a review streams (globals.css). Show
+  // them again if the review fails, and when leaving for the finished review.
+  useEffect(() => {
+    if (!loading) delete document.documentElement.dataset.reviewing;
+    return () => {
+      delete document.documentElement.dataset.reviewing;
+    };
+  }, [loading]);
 
   const handleFile = useCallback((f: File) => {
     const ext = f.name.split(".").pop()?.toLowerCase();
@@ -102,6 +111,8 @@ export default function InputArea({ previousId }: InputAreaProps) {
     setLoading(true);
     setError("");
     setPartial({});
+    document.documentElement.dataset.reviewing = "1";
+    window.scrollTo({ top: 0 });
 
     const shapeOptions = {
       context: {
@@ -192,32 +203,9 @@ export default function InputArea({ previousId }: InputAreaProps) {
   };
 
   if (loading) {
-    const hasContent = Object.keys(partial).length > 0;
-    return (
-      <div className="flex w-full flex-col items-center gap-8 py-8">
-        {!hasContent && (
-          <>
-            <p className="text-xl text-[var(--ui-ink)]">
-              Reading your document...
-            </p>
-            <div className="flex items-center gap-2">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="h-1.5 w-8 animate-pulse rounded-full bg-[var(--ui-field-border)]"
-                  style={{ animationDelay: `${i * 200}ms` }}
-                />
-              ))}
-            </div>
-          </>
-        )}
-        {hasContent && (
-          <div className="w-full text-left">
-            <ReviewBody result={partial} streaming />
-          </div>
-        )}
-      </div>
-    );
+    // Same layout as the finished review page: the header holds its shape with
+    // placeholders and sections arrive below it, so nothing jumps.
+    return <ReviewBody result={partial} streaming />;
   }
 
   return (

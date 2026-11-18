@@ -1,5 +1,3 @@
-import { EvaluationResult } from "@/lib/types";
-
 /** Stamps trimmed to their ink and set to the same 4 degree tilt as the home page strip. */
 const STAMP_IMAGES: Record<string, string> = {
   "Crystal Clear": "/stamps/trim/crystal-clear.png",
@@ -11,24 +9,56 @@ const STAMP_IMAGES: Record<string, string> = {
   Nope: "/stamps/trim/nope.png",
 };
 
-export default function ScoreDisplay({ result }: { result: EvaluationResult }) {
-  const stampSrc = STAMP_IMAGES[result.rating_name] || STAMP_IMAGES.Muddled;
+/**
+ * The top of a review: stamp, score, verdict. Every slot has a fixed size and
+ * shows a placeholder until its value streams in, so the header is the same
+ * shape from the first moment and nothing below it moves when the score lands.
+ */
+export default function ScoreDisplay({
+  overall,
+  rating,
+  verdict,
+}: {
+  overall?: number;
+  rating?: string;
+  verdict?: string;
+}) {
+  const stampSrc = rating ? STAMP_IMAGES[rating] || STAMP_IMAGES.Muddled : undefined;
 
   return (
     <div className="flex flex-col items-center">
       <div className="flex w-full justify-center rounded-[20px] border border-[var(--ui-panel-border)] bg-[var(--ui-panel)] px-6 py-7">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={stampSrc} alt={result.rating_name} className="h-[76px] w-auto mix-blend-multiply sm:h-[104px]" />
+        <div className="flex h-[76px] items-center sm:h-[104px]">
+          {stampSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={stampSrc} alt={rating} className="h-full w-auto mix-blend-multiply" />
+          ) : (
+            <div className="h-[60%] w-[200px] animate-pulse rounded-xl bg-black/[0.06] sm:w-[260px]" />
+          )}
+        </div>
       </div>
-      <p className="mt-6 text-[44px] font-semibold leading-none tracking-[-0.03em] text-[var(--ui-ink)] tabular-nums">
-        {result.overall}
-        <span className="ml-0.5 text-2xl font-medium text-[var(--ui-muted)]">/100</span>
-      </p>
-      {result.verdict && (
-        <p className="mt-4 max-w-[600px] text-balance text-center text-[20px] font-semibold leading-snug tracking-[-0.01em] text-[var(--ui-ink)]">
-          {result.verdict}
-        </p>
-      )}
+
+      <div className="mt-6 flex h-[44px] items-end">
+        {overall !== undefined ? (
+          <p className="text-[44px] font-semibold leading-none tracking-[-0.03em] text-[var(--ui-ink)] tabular-nums">
+            {overall}
+            <span className="ml-0.5 text-2xl font-medium text-[var(--ui-muted)]">/100</span>
+          </p>
+        ) : (
+          <div className="h-[36px] w-[120px] animate-pulse rounded-lg bg-[var(--ui-line)]" />
+        )}
+      </div>
+
+      {/* Two lines reserved: the verdict is one sentence of at most 20 words. */}
+      <div className="mt-4 flex min-h-[55px] w-full max-w-[600px] justify-center">
+        {verdict ? (
+          <p className="text-balance text-center text-[20px] font-semibold leading-snug tracking-[-0.01em] text-[var(--ui-ink)]">
+            {verdict}
+          </p>
+        ) : (
+          <div className="h-[22px] w-[70%] animate-pulse rounded-md bg-[var(--ui-line)]" />
+        )}
+      </div>
     </div>
   );
 }

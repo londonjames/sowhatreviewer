@@ -121,20 +121,16 @@ export function shapeResult(
   ].filter((c): c is CategoryEvaluation => !!c);
   if (categories.length) result.categories = categories;
 
-  // The headline score only appears once all three dimensions have landed,
-  // so it never jumps around as the stream fills in.
-  if (categories.length === 3) {
-    const [intent, delivery, narrative] = categories;
-    result.scores = {
-      intent: intent.score,
-      delivery: delivery.score,
-      narrative: narrative.score,
-    };
-    result.overall = calculateOverall(
-      intent.score,
-      delivery.score,
-      narrative.score
-    );
+  // The overall score appears once all three numbers have landed. They are the
+  // first fields the model writes, so the stamp and score fill in at the top
+  // before any of the text, and nothing above the reader moves afterwards.
+  const [i, d, n] = [input.intent, input.delivery, input.narrative];
+  // Wait for the verdict key: until it starts, the last number may still be
+  // half-written (a "4" that becomes "4.5").
+  const scoresComplete = "verdict" in input || "mirror_lead" in input;
+  if (scoresComplete && typeof i === "number" && typeof d === "number" && typeof n === "number") {
+    result.scores = { intent: clampScore(i), delivery: clampScore(d), narrative: clampScore(n) };
+    result.overall = calculateOverall(result.scores.intent, result.scores.delivery, result.scores.narrative);
     result.rating_name = ratingName(result.overall);
   }
 

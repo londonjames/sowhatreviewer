@@ -92,6 +92,7 @@ export default async function Home({
     <div className="themed min-h-screen bg-[var(--ui-page)] px-6 pt-16 pb-8 sm:pt-8 text-[var(--ui-ink)] transition-colors">
       <ThemeToggle />
       <div className="mx-auto w-full max-w-[680px]">
+        <div className="home-header">
         <h1 className="text-balance text-center text-[30px] font-semibold leading-[1.12] tracking-[-0.03em] sm:text-[40px] lg:whitespace-nowrap">
           Does your doc have a clear{" "}
           <span className="whitespace-nowrap text-[var(--ui-accent)]">So What?</span>
@@ -105,8 +106,9 @@ export default async function Home({
         <div className="mt-6">
           <Scale />
         </div>
+        </div>
 
-        <div className="mt-6">
+        <div className="home-form mt-6">
           <InputArea previousId={previous} />
         </div>
       </div>

@@ -104,12 +104,17 @@ Exactly 3 questions this audience will actually ask in the room and the author c
 
 Uploaded files arrive with location markers: [Page 3] for PDFs, [Slide 7] for decks, and speaker notes marked as such. When the document carries these markers, cite them in your feedback and action items so the author can find what you mean: "the ask first appears on slide 9", "move the payback table from page 6 to page 1". Never invent a page or slide number, and never repeat the markers themselves back as if they were part of the author's prose.`;
 
-function categoryProperties(key: string, label: string) {
+function scoreProperty(key: string, label: string) {
   return {
     [key]: {
       type: "number" as const,
       description: `${label} score from 0.5 to 5.0 in 0.5 increments. Use the full range; do not round up.`,
     },
+  };
+}
+
+function categoryProperties(key: string, label: string) {
+  return {
     [`${key}_headline`]: {
       type: "string" as const,
       description: `Headline for ${label} (max 15 words)`,
@@ -152,12 +157,33 @@ const EVALUATION_TOOL: Anthropic.Messages.Tool = {
       "red_team",
     ],
     properties: {
-      // Order matters: fields stream back in roughly this order, and the UI
-      // reveals each section as it completes.
+      // Order matters: fields stream back in this order and the page fills in
+      // top to bottom. Scores come first so the stamp and score land at the top
+      // within seconds and nothing above the reader moves afterwards.
+      ...scoreProperty("intent", "Intent"),
+      ...scoreProperty("delivery", "Delivery"),
+      ...scoreProperty("narrative", "Narrative"),
       verdict: {
         type: "string" as const,
         description:
           "One sentence (max 20 words) describing the quality of the document. Plain and specific, never clever.",
+      },
+      progress_addressed: {
+        type: "array" as const,
+        items: { type: "string" as const },
+        description:
+          "ONLY on a re-review. Which of the previous review's action items this version has addressed. Short phrases.",
+      },
+      progress_outstanding: {
+        type: "array" as const,
+        items: { type: "string" as const },
+        description:
+          "ONLY on a re-review. Which previous action items are still outstanding. Short phrases.",
+      },
+      progress_summary: {
+        type: "string" as const,
+        description:
+          "ONLY on a re-review. One sentence on what changed since the previous version.",
       },
       mirror_lead: {
         type: "string" as const,
@@ -223,23 +249,6 @@ const EVALUATION_TOOL: Anthropic.Messages.Tool = {
         items: { type: "string" as const },
         description:
           "Exactly 3 specific questions the author will be asked and cannot answer from this document.",
-      },
-      progress_addressed: {
-        type: "array" as const,
-        items: { type: "string" as const },
-        description:
-          "ONLY on a re-review. Which of the previous review's action items this version has addressed. Short phrases.",
-      },
-      progress_outstanding: {
-        type: "array" as const,
-        items: { type: "string" as const },
-        description:
-          "ONLY on a re-review. Which previous action items are still outstanding. Short phrases.",
-      },
-      progress_summary: {
-        type: "string" as const,
-        description:
-          "ONLY on a re-review. One sentence on what changed since the previous version.",
       },
     },
   },

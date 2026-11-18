@@ -3,7 +3,7 @@ import ThemeToggle from "./ThemeToggle";
 /** Page background, column width and the light/dark switch, shared by the review pages. */
 export default function PageShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="themed min-h-screen bg-[var(--ui-page)] px-6 pt-16 pb-12 text-[var(--ui-ink)] transition-colors sm:pt-12">
+    <div className="themed min-h-screen bg-[var(--ui-page)] px-6 pt-16 pb-12 text-[var(--ui-ink)] transition-colors sm:pt-8">
       <ThemeToggle />
       <div className="mx-auto w-full max-w-[680px]">{children}</div>
     </div>

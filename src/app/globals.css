@@ -83,3 +83,8 @@ body {
    (their widths add up to about 7.85 heights, plus room between), 60px from 640px up. */
 .scale-h { --h: min(40px, calc((100vw - 80px) / 9)); }
 @media (min-width: 640px) { .scale-h { --h: 60px; } }
+
+/* While a review streams on the home page, hide the title and scale so the
+   page has the same layout as the finished review it navigates to. */
+:root[data-reviewing] .home-header { display: none; }
+:root[data-reviewing] .home-form { margin-top: 0; }

@@ -39,12 +39,17 @@ export default function ReviewBody({
   const sections: React.ReactNode[] = [];
   const push = (node: React.ReactNode) => sections.push(node);
 
+  // Sections render in the order the model writes them (see the schema in
+  // lib/evaluate.ts), so while streaming the page only ever grows at the bottom.
+  if (streaming || result.overall !== undefined || result.verdict) {
+    push(
+      <ScoreDisplay key="score" overall={result.overall} rating={result.rating_name} verdict={result.verdict} />
+    );
+  }
+
   if (truncated) {
     push(
-      <div
-        key="truncated"
-        className="rounded-2xl border border-[var(--ui-amber)] p-4"
-      >
+      <div key="truncated" className="rounded-2xl border border-[var(--ui-amber)] p-4">
         <p className="text-base text-[var(--ui-ink)]">
           <span className="font-semibold">This document was too long to read in full.</span>{" "}
           The review covers roughly the first 300,000 characters, so anything
@@ -55,45 +60,14 @@ export default function ReviewBody({
   }
 
   if (result.progress && result.overall !== undefined) {
-    push(
-      <ProgressBanner
-        key="progress"
-        progress={result.progress}
-        overall={result.overall}
-      />
-    );
-  }
-
-  if (result.gap) push(<GapMirror key="gap" gap={result.gap} />);
-
-  // The score needs all three dimensions, so the verdict carries the page
-  // until they land rather than leaving a blank header while streaming.
-  if (result.overall !== undefined && result.rating_name) {
-    push(
-      <ScoreDisplay
-        key="score"
-        result={result as EvaluationResult}
-      />
-    );
-  } else if (result.verdict) {
-    push(
-      <div key="verdict-only" className="flex justify-center">
-        <p className="max-w-[600px] text-balance text-center text-[20px] font-semibold leading-snug text-[var(--ui-ink)]">
-          {result.verdict}
-        </p>
-      </div>
-    );
+    push(<ProgressBanner key="progress" progress={result.progress} overall={result.overall} />);
   }
 
   if (result.mirror_lead) {
-    push(
-      <MirrorSection
-        key="mirror"
-        lead={result.mirror_lead}
-        bullets={result.mirror_bullets || []}
-      />
-    );
+    push(<MirrorSection key="mirror" lead={result.mirror_lead} bullets={result.mirror_bullets || []} />);
   }
+
+  if (result.gap) push(<GapMirror key="gap" gap={result.gap} />);
 
   if (result.categories?.length) {
     push(<Rule key="rule-cat" />);
@@ -116,12 +90,13 @@ export default function ReviewBody({
   }
 
   if (streaming) {
-    const next = !result.verdict
-      ? "Reading your document"
-      : !result.mirror_lead
-        ? "Working out the so what"
-        : !result.categories?.length
-          ? "Scoring intent, delivery and narrative"
+    const next =
+      result.overall === undefined
+        ? "Reading your document"
+        : !result.mirror_lead
+          ? "Working out the so what"
+          : !result.categories?.length
+            ? "Writing the feedback"
           : !result.rewrites?.length
             ? "Writing the rewrites"
             : !result.red_team?.length
